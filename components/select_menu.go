@@ -18,7 +18,7 @@ const (
 )
 
 type SelectMenu struct {
-	Type         ComponentType   `json:"type"`
+	MenuType     ComponentType   `json:"type"`
 	CustomId     string          `json:"custom_id"`
 	Options      *[]SelectOption `json:"options,omitempty"`
 	ChannelTypes *[]ChannelType  `json:"channel_types,omitempty"`
@@ -37,3 +37,7 @@ type SelectOption struct {
 }
 
 type ChannelType uint8
+
+func (selectMenu SelectMenu) Type() ComponentType {
+	return selectMenu.MenuType
+}

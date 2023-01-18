@@ -19,4 +19,8 @@ type Button struct {
 	Disabled *bool          `json:"disabled,omitempty"`
 }
 
+func (button Button) Type() ComponentType {
+	return ButtonType
+}
+
 type ButtonStyle uint8

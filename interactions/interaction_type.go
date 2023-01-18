@@ -1,11 +1,11 @@
 package interactions
 
 const (
-	Ping InteractionType = iota + 1
-	ApplicationCommand
-	MessageComponent
-	ApplicationCommandAutocomplete
-	ModalSubmit
+	PingInteractionType InteractionType = iota + 1
+	ApplicationCommandInteractionType
+	MessageComponentInteractionType
+	ApplicationCommandAutocompleteInteractionType
+	ModalSubmitInteractionType
 )
 
 type InteractionType uint8
