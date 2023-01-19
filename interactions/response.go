@@ -1,6 +1,7 @@
 package interactions
 
 import (
+	"github.com/tgwaffles/lambda-discord-interactions-go/commands"
 	"github.com/tgwaffles/lambda-discord-interactions-go/components"
 	"github.com/tgwaffles/lambda-discord-interactions-go/discord"
 )
@@ -33,4 +34,14 @@ type MessageCallbackData struct {
 	Flags           *int                          `json:"flags,omitempty"`
 	Components      []components.MessageComponent `json:"components,omitempty"`
 	Attachments     []discord.Attachment          `json:"attachments,omitempty"`
+}
+
+type AutocompleteCallbackData struct {
+	Choices []commands.AutoCompleteChoice `json:"choices"`
+}
+
+type ModalCallback struct {
+	CustomId   string                        `json:"custom_id"`
+	Title      string                        `json:"title"`
+	Components []components.MessageComponent `json:"components"`
 }
