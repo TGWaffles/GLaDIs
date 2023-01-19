@@ -1,6 +1,6 @@
 package interactions
 
-import "github.com/tgwaffles/lambda-discord-interactions-go/discord"
+import "github.com/tgwaffles/gladis/discord"
 
 type ResolvedData struct {
 	Users   *map[string]*discord.User   `json:"users,omitempty"`

@@ -1,6 +1,6 @@
 package components
 
-import "github.com/tgwaffles/lambda-discord-interactions-go/discord"
+import "github.com/tgwaffles/gladis/discord"
 
 const (
 	GuildTextChannelType ChannelType = iota

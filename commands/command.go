@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"github.com/tgwaffles/lambda-discord-interactions-go/discord"
-	"github.com/tgwaffles/lambda-discord-interactions-go/interactions"
+	"github.com/tgwaffles/gladis/discord"
+	"github.com/tgwaffles/gladis/interactions"
 )
 
 type ApplicationCommandData struct {

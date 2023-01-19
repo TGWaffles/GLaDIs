@@ -1,4 +1,4 @@
-module github.com/tgwaffles/lambda-discord-interactions-go
+module github.com/tgwaffles/gladis
 
 go 1.18
 

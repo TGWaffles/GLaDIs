@@ -1,9 +1,9 @@
 package interactions
 
 import (
-	"github.com/tgwaffles/lambda-discord-interactions-go/commands"
-	"github.com/tgwaffles/lambda-discord-interactions-go/components"
-	"github.com/tgwaffles/lambda-discord-interactions-go/discord"
+	"github.com/tgwaffles/gladis/commands"
+	"github.com/tgwaffles/gladis/components"
+	"github.com/tgwaffles/gladis/discord"
 )
 
 const (
