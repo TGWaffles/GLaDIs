@@ -1,6 +1,9 @@
 package interactions
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/tgwaffles/gladis/commands"
 	"github.com/tgwaffles/gladis/components"
 	"github.com/tgwaffles/gladis/discord"
@@ -21,6 +24,24 @@ type InteractionCallbackType uint8
 type InteractionResponse struct {
 	Type InteractionCallbackType `json:"type"`
 	Data InteractionCallbackData `json:"data,omitempty"`
+}
+
+func (ir InteractionResponse) ToAPIGatewayResponse() events.APIGatewayProxyResponse {
+	data, err := json.Marshal(ir)
+	if err != nil {
+		fmt.Println("Error marshalling interaction response:", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+		}
+	}
+	return events.APIGatewayProxyResponse{
+		StatusCode:      200,
+		IsBase64Encoded: false,
+		Body:            string(data),
+		Headers: map[string]string{
+			"Content-Type": "application/json",
+		},
+	}
 }
 
 type InteractionCallbackData interface {
@@ -44,4 +65,22 @@ type ModalCallback struct {
 	CustomId   string                        `json:"custom_id"`
 	Title      string                        `json:"title"`
 	Components []components.MessageComponent `json:"components"`
+}
+
+func CreatePongResponse() InteractionResponse {
+	return InteractionResponse{
+		Type: PongInteractionCallbackType,
+	}
+}
+
+func CreateDeferMessageResponse() InteractionResponse {
+	return InteractionResponse{
+		Type: DeferredChannelMessageWithSourceInteractionCallbackType,
+	}
+}
+
+func CreateDeferEditResponse() InteractionResponse {
+	return InteractionResponse{
+		Type: DeferredUpdateMessageInteractionCallbackType,
+	}
 }
