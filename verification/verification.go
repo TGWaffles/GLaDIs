@@ -14,7 +14,7 @@ func VerifyRequest(publicKey string, request events.APIGatewayProxyRequest) bool
 		return false
 	}
 
-	signatureAsString := request.Headers["X-Signature-Ed25519"]
+	signatureAsString := request.Headers["x-signature-ed25519"]
 
 	if len(signatureAsString) == 0 {
 		fmt.Println("Missing signature")
@@ -26,7 +26,7 @@ func VerifyRequest(publicKey string, request events.APIGatewayProxyRequest) bool
 		fmt.Println("Failed to decode signature")
 		return false
 	}
-	timestamp := request.Headers["X-Signature-Timestamp"]
+	timestamp := request.Headers["x-signature-timestamp"]
 	if len(timestamp) == 0 {
 		fmt.Println("Missing timestamp")
 		return false
