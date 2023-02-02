@@ -1,10 +1,13 @@
 package interactions
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/tgwaffles/gladis/commands"
 	"github.com/tgwaffles/gladis/components"
 	"github.com/tgwaffles/gladis/discord"
+	"net/http"
 )
 
 type Interaction struct {
@@ -20,6 +23,12 @@ type Interaction struct {
 	Token         string             `json:"token"`
 	Version       int                `json:"version"`
 }
+
+const (
+	apiUrl                       = "https://discord.com/api"
+	createInteractionResponseUrl = apiUrl + "/interactions/%d/%s/callback"
+	hookUrl                      = apiUrl + "/webhooks/%d/%s/messages/@original"
+)
 
 func Parse(data string) (interaction *Interaction, err error) {
 	err = json.Unmarshal([]byte(data), &interaction)
@@ -59,4 +68,96 @@ func (interaction *Interaction) createData() (err error) {
 
 func (interaction *Interaction) IsPing() bool {
 	return interaction.Type == PingInteractionType
+}
+
+func (interaction *Interaction) CreateResponse(response InteractionResponse) error {
+	data, err := json.Marshal(response)
+	if err != nil {
+		return err
+	}
+	request, err := http.NewRequest("POST", fmt.Sprintf(createInteractionResponseUrl, interaction.ApplicationId, interaction.Token), bytes.NewReader(data))
+
+	if err != nil {
+		return err
+	}
+
+	client := http.Client{}
+	resp, err := client.Do(request)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 204 {
+		return fmt.Errorf("expected status code 204, got %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
+func (interaction *Interaction) GetResponse() (*discord.Message, error) {
+	request, err := http.NewRequest("GET", fmt.Sprintf(hookUrl, interaction.ApplicationId, interaction.Token), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	client := http.Client{}
+	resp, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("expected status code 200, got %d", resp.StatusCode)
+	}
+
+	var message discord.Message
+	err = json.NewDecoder(resp.Body).Decode(&message)
+	if err != nil {
+		return nil, err
+	}
+
+	return &message, nil
+}
+
+func (interaction *Interaction) EditResponse(data ResponseEditData) error {
+	body, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	request, err := http.NewRequest("PATCH", fmt.Sprintf(hookUrl, interaction.ApplicationId, interaction.Token), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+
+	client := http.Client{}
+	resp, err := client.Do(request)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("expected status code 200, got %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
+func (interaction *Interaction) DeleteResponse() error {
+	request, err := http.NewRequest("DELETE", fmt.Sprintf(hookUrl, interaction.ApplicationId, interaction.Token), nil)
+	if err != nil {
+		return err
+	}
+
+	client := http.Client{}
+	resp, err := client.Do(request)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 204 {
+		return fmt.Errorf("expected status code 204, got %d", resp.StatusCode)
+	}
+
+	return nil
 }

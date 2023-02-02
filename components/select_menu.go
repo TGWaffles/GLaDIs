@@ -2,30 +2,15 @@ package components
 
 import "github.com/tgwaffles/gladis/discord"
 
-const (
-	GuildTextChannelType ChannelType = iota
-	DMChannelType
-	GuildVoiceChannelType
-	GroupDMChannelType
-	GuildCategoryChannelType
-	GuildAnnouncementChannelType
-	AnnouncementThreadChannelType = iota + 4
-	PublicThreadChannelType
-	PrivateThreadChannelType
-	GuildStageVoiceChannelType
-	GuildDirectoryChannelType
-	GuildForumChannelType
-)
-
 type SelectMenu struct {
-	MenuType     ComponentType   `json:"type"`
-	CustomId     string          `json:"custom_id"`
-	Options      *[]SelectOption `json:"options,omitempty"`
-	ChannelTypes *[]ChannelType  `json:"channel_types,omitempty"`
-	Placeholder  *string         `json:"placeholder,omitempty"`
-	MinValues    *uint8          `json:"min_values,omitempty"`
-	MaxValues    *uint8          `json:"max_values,omitempty"`
-	Disabled     *bool           `json:"disabled,omitempty"`
+	MenuType     ComponentType          `json:"type"`
+	CustomId     string                 `json:"custom_id"`
+	Options      *[]SelectOption        `json:"options,omitempty"`
+	ChannelTypes *[]discord.ChannelType `json:"channel_types,omitempty"`
+	Placeholder  *string                `json:"placeholder,omitempty"`
+	MinValues    *uint8                 `json:"min_values,omitempty"`
+	MaxValues    *uint8                 `json:"max_values,omitempty"`
+	Disabled     *bool                  `json:"disabled,omitempty"`
 }
 
 type SelectOption struct {
@@ -35,8 +20,6 @@ type SelectOption struct {
 	Emoji       *discord.Emoji `json:"emoji,omitempty"`
 	Default     *bool          `json:"default,omitempty"`
 }
-
-type ChannelType uint8
 
 func (selectMenu SelectMenu) Type() ComponentType {
 	return selectMenu.MenuType

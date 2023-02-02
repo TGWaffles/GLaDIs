@@ -57,6 +57,13 @@ type MessageCallbackData struct {
 	Attachments     []discord.Attachment          `json:"attachments,omitempty"`
 }
 
+type ResponseEditData struct {
+	Content         *string                       `json:"content,omitempty"`
+	Embeds          []discord.Embed               `json:"embeds,omitempty"`
+	AllowedMentions *discord.AllowedMentions      `json:"allowed_mentions,omitempty"`
+	Components      []components.MessageComponent `json:"components,omitempty"`
+}
+
 type AutocompleteCallbackData struct {
 	Choices []commands.AutoCompleteChoice `json:"choices"`
 }
