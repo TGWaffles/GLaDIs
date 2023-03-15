@@ -60,8 +60,8 @@ type MessageCallbackData struct {
 type ResponseEditData struct {
 	Content         *string                       `json:"content,omitempty"`
 	Embeds          []discord.Embed               `json:"embeds,omitempty"`
-	AllowedMentions *discord.AllowedMentions      `json:"allowed_mentions,omitempty"`
-	Components      []components.MessageComponent `json:"components,omitempty"`
+	AllowedMentions *discord.AllowedMentions      `json:"allowed_mentions"`
+	Components      []components.MessageComponent `json:"components"`
 }
 
 type AutocompleteCallbackData struct {
