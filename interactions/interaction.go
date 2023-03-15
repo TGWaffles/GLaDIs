@@ -33,9 +33,14 @@ const (
 func Parse(data string) (interaction *Interaction, err error) {
 	err = json.Unmarshal([]byte(data), &interaction)
 	if err == nil {
-		err = interaction.createData()
+		err = interaction.Initialize()
 	}
 	return interaction, err
+}
+
+func (interaction *Interaction) Initialize() (err error) {
+	err = interaction.createData()
+	return err
 }
 
 func (interaction *Interaction) createData() (err error) {
