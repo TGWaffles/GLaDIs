@@ -7,6 +7,8 @@ import (
 	"github.com/tgwaffles/gladis/commands"
 	"github.com/tgwaffles/gladis/components"
 	"github.com/tgwaffles/gladis/discord"
+	"io"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -140,22 +142,30 @@ func (interaction *Interaction) GetResponse() (*discord.Message, error) {
 func (interaction *Interaction) EditResponse(data ResponseEditData) error {
 	body, err := json.Marshal(data)
 	if err != nil {
-		return err
+		return fmt.Errorf("error marshaling data to JSON: %s", err.Error())
 	}
 
 	request, err := http.NewRequest("PATCH", fmt.Sprintf(hookUrl, interaction.ApplicationId, interaction.Token), bytes.NewReader(body))
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating HTTP request: %s", err.Error())
 	}
 
 	client := http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
-		return err
+		return fmt.Errorf("error sending HTTP request: %s", err.Error())
+	}
+
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("error reading HTTP response body: %s", err.Error())
 	}
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("expected status code 200, got %d", resp.StatusCode)
+		return fmt.Errorf("expected status code 200, got %d. Response body: %s", resp.StatusCode, string(responseBody))
 	}
 
 	return nil
@@ -164,17 +174,25 @@ func (interaction *Interaction) EditResponse(data ResponseEditData) error {
 func (interaction *Interaction) DeleteResponse() error {
 	request, err := http.NewRequest("DELETE", fmt.Sprintf(hookUrl, interaction.ApplicationId, interaction.Token), nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating HTTP request: %s", err.Error())
 	}
 
 	client := http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
-		return err
+		return fmt.Errorf("error sending HTTP request: %s", err.Error())
+	}
+
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("error reading HTTP response body: %s", err.Error())
 	}
 
 	if resp.StatusCode != 204 {
-		return fmt.Errorf("expected status code 204, got %d", resp.StatusCode)
+		return fmt.Errorf("expected status code 204, got %d. Response body: %s", resp.StatusCode, string(responseBody))
 	}
 
 	return nil
