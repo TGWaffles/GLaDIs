@@ -34,7 +34,7 @@ func (m *MessageComponentWrapper) UnmarshalJSON(data []byte) error {
 	case ActionRowType:
 		var actionRow ActionRow
 		err = json.Unmarshal(data, &actionRow)
-		m.component = actionRow
+		m.component = &actionRow
 		break
 	case ButtonType:
 		var button Button
