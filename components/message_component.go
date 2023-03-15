@@ -1,6 +1,9 @@
 package components
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"github.com/tgwaffles/gladis/discord"
+)
 
 const (
 	ActionRowType ComponentType = iota + 1
@@ -63,7 +66,8 @@ func (a ActionRow) Type() ComponentType {
 }
 
 type MessageComponentData struct {
-	CustomId string        `json:"custom_id"`
-	Type     ComponentType `json:"component_type"`
-	Values   SelectOption  `json:"values"`
+	CustomId string                `json:"custom_id"`
+	Type     ComponentType         `json:"component_type"`
+	Values   []string              `json:"values"`
+	Resolved *discord.ResolvedData `json:"resolved,omitempty"`
 }
