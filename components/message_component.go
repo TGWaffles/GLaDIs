@@ -58,10 +58,21 @@ type MessageComponent interface {
 type ComponentType uint8
 
 type ActionRow struct {
+	RowType    ComponentType      `json:"type"`
 	Components []MessageComponent `json:"components"`
 }
 
-func (a ActionRow) Type() ComponentType {
+func (m *ActionRow) MarshalJSON() ([]byte, error) {
+	type Alias ActionRow
+
+	var inner *Alias
+	inner = (*Alias)(m)
+	inner.RowType = ActionRowType
+
+	return json.Marshal(inner)
+}
+
+func (a *ActionRow) Type() ComponentType {
 	return ActionRowType
 }
 
