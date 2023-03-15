@@ -34,7 +34,7 @@ func (m *MessageComponentWrapper) UnmarshalJSON(data []byte) error {
 	case ActionRowType:
 		var actionRow ActionRow
 		err = json.Unmarshal(data, &actionRow)
-		m.component = &actionRow
+		m.component = actionRow
 		break
 	case ButtonType:
 		var button Button
@@ -62,17 +62,17 @@ type ActionRow struct {
 	Components []MessageComponent `json:"components"`
 }
 
-func (m *ActionRow) MarshalJSON() ([]byte, error) {
+func (a ActionRow) MarshalJSON() ([]byte, error) {
 	type Alias ActionRow
 
-	var inner *Alias
-	inner = (*Alias)(m)
+	var inner Alias
+	inner = Alias(a)
 	inner.RowType = ActionRowType
 
 	return json.Marshal(inner)
 }
 
-func (a *ActionRow) Type() ComponentType {
+func (a ActionRow) Type() ComponentType {
 	return ActionRowType
 }
 
