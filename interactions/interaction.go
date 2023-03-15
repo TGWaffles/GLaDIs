@@ -32,15 +32,28 @@ const (
 
 func Parse(data string) (interaction *Interaction, err error) {
 	err = json.Unmarshal([]byte(data), &interaction)
-	if err == nil {
-		err = interaction.Initialize()
-	}
 	return interaction, err
 }
 
-func (interaction *Interaction) Initialize() (err error) {
-	err = interaction.createData()
-	return err
+func (interaction *Interaction) UnmarshalJSON(d []byte) error {
+	type InnerInteraction Interaction
+
+	var inner InnerInteraction
+
+	if err := json.Unmarshal(d, &inner); err != nil {
+		return err
+	}
+
+	castInteraction := Interaction(inner)
+
+	err := castInteraction.createData()
+	if err != nil {
+		return err
+	}
+
+	*interaction = castInteraction
+
+	return nil
 }
 
 func (interaction *Interaction) createData() (err error) {
