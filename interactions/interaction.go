@@ -96,6 +96,7 @@ func (interaction *Interaction) CreateResponse(response InteractionResponse) err
 		return err
 	}
 	request, err := http.NewRequest("POST", fmt.Sprintf(createInteractionResponseUrl, interaction.ApplicationId, interaction.Token), bytes.NewReader(data))
+	request.Header.Set("Content-Type", "application/json")
 
 	if err != nil {
 		return err
@@ -119,6 +120,7 @@ func (interaction *Interaction) GetResponse() (*discord.Message, error) {
 	if err != nil {
 		return nil, err
 	}
+	request.Header.Set("Content-Type", "application/json")
 
 	client := http.Client{}
 	resp, err := client.Do(request)
@@ -150,6 +152,8 @@ func (interaction *Interaction) EditResponse(data ResponseEditData) error {
 		return fmt.Errorf("error creating HTTP request: %s", err.Error())
 	}
 
+	request.Header.Set("Content-Type", "application/json")
+
 	client := http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
@@ -176,6 +180,7 @@ func (interaction *Interaction) DeleteResponse() error {
 	if err != nil {
 		return fmt.Errorf("error creating HTTP request: %s", err.Error())
 	}
+	request.Header.Set("Content-Type", "application/json")
 
 	client := http.Client{}
 	resp, err := client.Do(request)
