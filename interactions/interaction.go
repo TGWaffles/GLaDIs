@@ -13,17 +13,21 @@ import (
 )
 
 type Interaction struct {
-	Id            discord.Snowflake  `json:"id"`
-	ApplicationId discord.Snowflake  `json:"application_id"`
-	Type          InteractionType    `json:"type"`
-	DataInternal  *json.RawMessage   `json:"data,omitempty"`
-	Data          InteractionData    `json:"-"`
-	GuildId       *discord.Snowflake `json:"guild_id,omitempty"`
-	ChannelId     *discord.Snowflake `json:"channel_id,omitempty"`
-	Member        *discord.Member    `json:"member,omitempty"`
-	User          *discord.User      `json:"user,omitempty"`
-	Token         string             `json:"token"`
-	Version       int                `json:"version"`
+	Id             discord.Snowflake    `json:"id"`
+	ApplicationId  discord.Snowflake    `json:"application_id"`
+	Type           InteractionType      `json:"type"`
+	DataInternal   *json.RawMessage     `json:"data,omitempty"`
+	Data           InteractionData      `json:"-"`
+	GuildId        *discord.Snowflake   `json:"guild_id,omitempty"`
+	ChannelId      *discord.Snowflake   `json:"channel_id,omitempty"`
+	Member         *discord.Member      `json:"member,omitempty"`
+	User           *discord.User        `json:"user,omitempty"`
+	Token          string               `json:"token"`
+	Version        int                  `json:"version"`
+	Message        *discord.Message     `json:"message,omitempty"`
+	AppPermissions *discord.Permissions `json:"permissions,omitempty"`
+	Locale         string               `json:"locale"`
+	GuildLocale    string               `json:"guild_locale"`
 }
 
 const (
