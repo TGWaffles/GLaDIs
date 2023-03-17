@@ -15,7 +15,7 @@ type ApplicationCommandData struct {
 	optionMap map[string]ApplicationCommandOption
 }
 
-func (commandData *ApplicationCommandData) getOption(optionName string) *ApplicationCommandOption {
+func (commandData *ApplicationCommandData) GetOption(optionName string) *ApplicationCommandOption {
 	if commandData.Options == nil {
 		return nil
 	}
