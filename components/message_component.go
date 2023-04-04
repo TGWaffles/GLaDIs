@@ -46,6 +46,11 @@ func (m *MessageComponentWrapper) UnmarshalJSON(data []byte) error {
 		err = json.Unmarshal(data, &selectMenu)
 		m.component = selectMenu
 		break
+	case TextInputType:
+		var textInput TextInput
+		err = json.Unmarshal(data, &textInput)
+		m.component = textInput
+		break
 	}
 	return err
 }
@@ -70,6 +75,27 @@ func (a ActionRow) MarshalJSON() ([]byte, error) {
 	inner.RowType = ActionRowType
 
 	return json.Marshal(inner)
+}
+
+func (a ActionRow) UnmarshalJSON(data []byte) error {
+	dataMap := make(map[string]interface{})
+	err := json.Unmarshal(data, &dataMap)
+	if err != nil {
+		return err
+	}
+
+	a.RowType = ActionRowType
+	components := dataMap["components"].([]interface{})
+	for _, component := range components {
+		var messageComponent MessageComponentWrapper
+		err = json.Unmarshal([]byte(component.(string)), &messageComponent)
+		if err != nil {
+			return err
+		}
+		a.Components = append(a.Components, messageComponent.component)
+	}
+
+	return nil
 }
 
 func (a ActionRow) Type() ComponentType {
