@@ -97,19 +97,19 @@ func (interaction *Interaction) IsPing() bool {
 func (interaction *Interaction) CreateResponse(response InteractionResponse) error {
 	data, err := json.Marshal(response)
 	if err != nil {
-		return err
+		return fmt.Errorf("error marshaling data to JSON: %w", err)
 	}
 	request, err := http.NewRequest("POST", fmt.Sprintf(createInteractionResponseUrl, interaction.ApplicationId, interaction.Token), bytes.NewReader(data))
-	request.Header.Set("Content-Type", "application/json")
-
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating HTTP request: %w", err)
 	}
+
+	request.Header.Set("Content-Type", "application/json")
 
 	client := http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
-		return err
+		return fmt.Errorf("error sending HTTP request: %w", err)
 	}
 
 	if resp.StatusCode != 204 {
@@ -122,14 +122,14 @@ func (interaction *Interaction) CreateResponse(response InteractionResponse) err
 func (interaction *Interaction) GetResponse() (*discord.Message, error) {
 	request, err := http.NewRequest("GET", fmt.Sprintf(hookUrl, interaction.ApplicationId, interaction.Token), nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error creating HTTP request: %w", err)
 	}
 	request.Header.Set("Content-Type", "application/json")
 
 	client := http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error sending HTTP request: %w", err)
 	}
 
 	if resp.StatusCode != 200 {
@@ -139,7 +139,7 @@ func (interaction *Interaction) GetResponse() (*discord.Message, error) {
 	var message discord.Message
 	err = json.NewDecoder(resp.Body).Decode(&message)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error decoding HTTP response body: %w", err)
 	}
 
 	return &message, nil
@@ -148,12 +148,12 @@ func (interaction *Interaction) GetResponse() (*discord.Message, error) {
 func (interaction *Interaction) EditResponse(data ResponseEditData) error {
 	body, err := json.Marshal(data)
 	if err != nil {
-		return fmt.Errorf("error marshaling data to JSON: %s", err.Error())
+		return fmt.Errorf("error marshaling data to JSON: %w", err)
 	}
 
 	request, err := http.NewRequest("PATCH", fmt.Sprintf(hookUrl, interaction.ApplicationId, interaction.Token), bytes.NewReader(body))
 	if err != nil {
-		return fmt.Errorf("error creating HTTP request: %s", err.Error())
+		return fmt.Errorf("error creating HTTP request: %w", err)
 	}
 
 	request.Header.Set("Content-Type", "application/json")
@@ -161,7 +161,7 @@ func (interaction *Interaction) EditResponse(data ResponseEditData) error {
 	client := http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
-		return fmt.Errorf("error sending HTTP request: %s", err.Error())
+		return fmt.Errorf("error sending HTTP request: %w", err)
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -169,7 +169,7 @@ func (interaction *Interaction) EditResponse(data ResponseEditData) error {
 	}(resp.Body)
 	responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("error reading HTTP response body: %s", err.Error())
+		return fmt.Errorf("error reading HTTP response body: %w", err)
 	}
 
 	if resp.StatusCode != 200 {
@@ -182,14 +182,14 @@ func (interaction *Interaction) EditResponse(data ResponseEditData) error {
 func (interaction *Interaction) DeleteResponse() error {
 	request, err := http.NewRequest("DELETE", fmt.Sprintf(hookUrl, interaction.ApplicationId, interaction.Token), nil)
 	if err != nil {
-		return fmt.Errorf("error creating HTTP request: %s", err.Error())
+		return fmt.Errorf("error creating HTTP request: %w", err)
 	}
 	request.Header.Set("Content-Type", "application/json")
 
 	client := http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
-		return fmt.Errorf("error sending HTTP request: %s", err.Error())
+		return fmt.Errorf("error sending HTTP request: %w", err)
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -197,7 +197,7 @@ func (interaction *Interaction) DeleteResponse() error {
 	}(resp.Body)
 	responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("error reading HTTP response body: %s", err.Error())
+		return fmt.Errorf("error reading HTTP response body: %w", err)
 	}
 
 	if resp.StatusCode != 204 {
