@@ -60,6 +60,14 @@ type Message struct {
 	Type            MessageType      `json:"type"`
 }
 
+type MessageReference struct {
+	MessageId Snowflake `json:"message_id,omitempty"`
+	// Optional when sending a reply
+	ChannelId       Snowflake `json:"channel_id,omitempty"`
+	GuildId         Snowflake `json:"guild_id,omitempty"`
+	FailIfNotExists bool      `json:"fail_if_not_exists,omitempty"`
+}
+
 type ChannelMention struct {
 	Id      Snowflake   `json:"id"`
 	GuildId Snowflake   `json:"guild_id"`

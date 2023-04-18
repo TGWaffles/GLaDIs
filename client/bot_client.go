@@ -72,3 +72,27 @@ func (botClient *BotClient) GetGuildClient(guildId discord.Snowflake) *GuildClie
 		Bot:     botClient,
 	}
 }
+
+func (botClient *BotClient) GetChannelClient(channelId discord.Snowflake) *ChannelClient {
+	return &ChannelClient{
+		ChannelId: channelId,
+		Bot:       botClient,
+	}
+}
+
+func (botClient *BotClient) GetUserClient(userId discord.Snowflake) *UserClient {
+	if userId == 0 {
+		return nil
+	}
+	return &UserClient{
+		UserId: userId,
+		Bot:    botClient,
+	}
+}
+
+func (botClient *BotClient) GetSelfUserClient() *UserClient {
+	return &UserClient{
+		UserId: discord.Snowflake(0),
+		Bot:    botClient,
+	}
+}
