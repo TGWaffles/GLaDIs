@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/tgwaffles/gladis/commands"
-	"github.com/tgwaffles/gladis/components"
-	"github.com/tgwaffles/gladis/discord"
 	"io"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/tgwaffles/gladis/commands"
+	"github.com/tgwaffles/gladis/components"
+	"github.com/tgwaffles/gladis/discord"
 )
 
 type Interaction struct {
@@ -99,7 +100,7 @@ func (interaction *Interaction) CreateResponse(response InteractionResponse) err
 	if err != nil {
 		return fmt.Errorf("error marshaling data to JSON: %w", err)
 	}
-	request, err := http.NewRequest("POST", fmt.Sprintf(createInteractionResponseUrl, interaction.ApplicationId, interaction.Token), bytes.NewReader(data))
+	request, err := http.NewRequest("POST", fmt.Sprintf(createInteractionResponseUrl, interaction.Id, interaction.Token), bytes.NewReader(data))
 	if err != nil {
 		return fmt.Errorf("error creating HTTP request: %w", err)
 	}
