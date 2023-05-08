@@ -17,6 +17,23 @@ func (guildClient *GuildClient) MakeRequest(discordRequest DiscordRequest) (resp
 	return guildClient.Bot.MakeRequest(discordRequest)
 }
 
+func (guildClient *GuildClient) FetchGuild() (*discord.Guild, error) {
+	guild := &discord.Guild{}
+	_, err := guildClient.MakeRequest(DiscordRequest{
+		Method:         "GET",
+		Endpoint:       "",
+		Body:           nil,
+		ExpectedStatus: 200,
+		UnmarshalTo:    guild,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return guild, nil
+}
+
 func (guildClient *GuildClient) GetMemberClient(memberId discord.Snowflake) *MemberClient {
 	return &MemberClient{
 		MemberId:    memberId,
