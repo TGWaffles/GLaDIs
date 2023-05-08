@@ -30,7 +30,7 @@ type Channel struct {
 	Type                          ChannelType      `json:"type"`
 	GuildId                       *Snowflake       `json:"guild_id,omitempty"`
 	Position                      *int             `json:"position,omitempty"`
-	PermissionOverwrites          *[]Overwrite     `json:"permission_overwrites,omitempty"`
+	PermissionOverwrites          []Overwrite      `json:"permission_overwrites,omitempty"`
 	Name                          *string          `json:"name,omitempty"`
 	Topic                         *string          `json:"topic,omitempty"`
 	Nsfw                          *bool            `json:"nsfw,omitempty"`
@@ -38,7 +38,7 @@ type Channel struct {
 	Bitrate                       *int             `json:"bitrate,omitempty"`
 	UserLimit                     *int             `json:"user_limit,omitempty"`
 	RateLimitPerUser              *int             `json:"rate_limit_per_user,omitempty"`
-	Recipients                    *[]User          `json:"recipients,omitempty"`
+	Recipients                    []User           `json:"recipients,omitempty"`
 	Icon                          *string          `json:"icon,omitempty"`
 	OwnerId                       *Snowflake       `json:"owner_id,omitempty"`
 	ApplicationId                 *Snowflake       `json:"application_id,omitempty"`
@@ -55,8 +55,8 @@ type Channel struct {
 	Permissions                   *string          `json:"permissions,omitempty"`
 	Flags                         *int             `json:"flags,omitempty"`
 	TotalMessageSent              *int             `json:"total_message_sent,omitempty"`
-	AvailableTags                 *[]Tag           `json:"available_tags,omitempty"`
-	AppliedTags                   *[]Snowflake     `json:"applied_tags,omitempty"`
+	AvailableTags                 []Tag            `json:"available_tags,omitempty"`
+	AppliedTags                   []Snowflake      `json:"applied_tags,omitempty"`
 	DefaultReactionEmoji          *DefaultReaction `json:"default_reaction_emoji,omitempty"`
 	DefaultThreadRateLimitPerUser *int             `json:"default_thread_rate_limit_per_user,omitempty"`
 	DefaultSortOrder              *int             `json:"default_sort_order,omitempty"`

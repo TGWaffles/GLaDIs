@@ -53,7 +53,7 @@ type Message struct {
 	MentionChannels []ChannelMention `json:"mention_channels"`
 	Attachments     []Attachment     `json:"attachments"`
 	Embeds          []Embed          `json:"embeds"`
-	Reactions       *[]Reaction      `json:"reactions,omitempty"`
+	Reactions       []Reaction       `json:"reactions,omitempty"`
 	Nonce           interface{}      `json:"nonce,omitempty"`
 	Pinned          bool             `json:"pinned"`
 	WebhookId       *Snowflake       `json:"webhook_id,omitempty"`

@@ -5,7 +5,7 @@ type Application struct {
 	Name                           string         `json:"name"`
 	Icon                           string         `json:"icon"`
 	Description                    string         `json:"description"`
-	RpcOrigins                     *[]string      `json:"rpc_origins,omitempty"`
+	RpcOrigins                     []string       `json:"rpc_origins,omitempty"`
 	BotPublic                      bool           `json:"bot_public"`
 	BotRequireCodeGrant            bool           `json:"bot_require_code_grant"`
 	TermsOfServiceUrl              *string        `json:"terms_of_service_url,omitempty"`
@@ -18,7 +18,7 @@ type Application struct {
 	Slug                           *string        `json:"slug,omitempty"`
 	CoverImage                     *string        `json:"cover_image,omitempty"`
 	Flags                          *uint          `json:"flags,omitempty"`
-	Tags                           *[]string      `json:"tags,omitempty"`
+	Tags                           []string       `json:"tags,omitempty"`
 	InstallParams                  *InstallParams `json:"install_params,omitempty"`
 	CustomInstallUrl               *string        `json:"custom_install_url,omitempty"`
 	RoleConnectionsVerificationUrl *string        `json:"role_connections_verification_url,omitempty"`
