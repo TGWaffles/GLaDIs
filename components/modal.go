@@ -63,3 +63,60 @@ func (t TextInput) MarshalJSON() ([]byte, error) {
 func (t TextInput) Type() ComponentType {
 	return TextInputType
 }
+
+func (t TextInput) Verify() error {
+	if t.CustomId == "" {
+		return ErrComponentMustHaveCustomId{t}
+	}
+	if len(t.CustomId) > 100 {
+		return ErrInvalidPropertyLength{
+			Component:      t,
+			PropertyName:   "custom_id",
+			MaxLength:      100,
+			MinLength:      1,
+			PropertyLength: len(t.CustomId),
+			PropertyValue:  t.CustomId,
+		}
+	}
+	if t.Style == 0 {
+		return ErrComponentMustHaveStyle{t}
+	}
+
+	if t.Label == "" {
+		return ErrComponentMissingProperty{t, "label"}
+	}
+	if len(t.Label) > 45 {
+		return ErrInvalidPropertyLength{
+			Component:      t,
+			PropertyName:   "label",
+			MaxLength:      45,
+			MinLength:      1,
+			PropertyLength: len(t.Label),
+			PropertyValue:  t.Label,
+		}
+	}
+
+	if len(t.Value) > 4000 {
+		return ErrInvalidPropertyLength{
+			Component:      t,
+			PropertyName:   "value",
+			MaxLength:      4000,
+			MinLength:      1,
+			PropertyLength: len(t.Value),
+			PropertyValue:  t.Value,
+		}
+	}
+
+	if len(t.Placeholder) > 100 {
+		return ErrInvalidPropertyLength{
+			Component:      t,
+			PropertyName:   "placeholder",
+			MaxLength:      100,
+			MinLength:      1,
+			PropertyLength: len(t.Placeholder),
+			PropertyValue:  t.Placeholder,
+		}
+	}
+
+	return nil
+}

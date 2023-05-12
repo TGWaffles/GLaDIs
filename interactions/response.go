@@ -64,6 +64,30 @@ type ResponseEditData struct {
 	Components      []components.MessageComponent `json:"components"`
 }
 
+func (data ResponseEditData) Verify() error {
+	if data.Content != nil && len(*data.Content) > 2000 {
+		return fmt.Errorf("content cannot be longer than 2000 characters (you have %d)", len(*data.Content))
+	}
+
+	if len(data.Embeds) > 10 {
+		return fmt.Errorf("too many embeds (max 10, you have %d)", len(data.Embeds))
+	}
+
+	for _, component := range data.Components {
+		if err := component.Verify(); err != nil {
+			return err
+		}
+	}
+
+	for _, embed := range data.Embeds {
+		if err := embed.Verify(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 type AutocompleteCallbackData struct {
 	Choices []commands.AutoCompleteChoice `json:"choices"`
 }

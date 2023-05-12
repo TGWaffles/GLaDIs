@@ -37,4 +37,23 @@ func (button Button) Type() ComponentType {
 	return ButtonType
 }
 
+func (button Button) Verify() error {
+	if button.Style == LinkButtonStyle {
+		if button.CustomId != nil {
+			return ErrLinkButtonCannotHaveCustomId{button}
+		}
+		if button.Url == nil {
+			return ErrLinkButtonMustHaveUrl{button}
+		}
+	} else {
+		if button.Url != nil {
+			return ErrNonLinkButtonCannotHaveUrl{button}
+		}
+		if button.CustomId == nil {
+			return ErrComponentMustHaveCustomId{button}
+		}
+	}
+	return nil
+}
+
 type ButtonStyle uint8

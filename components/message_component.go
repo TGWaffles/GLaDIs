@@ -58,6 +58,7 @@ func (m *MessageComponentWrapper) UnmarshalJSON(data []byte) error {
 // MessageComponent can be made of any variables, so it's a map until we parse it into a specific component.
 type MessageComponent interface {
 	Type() ComponentType
+	Verify() error
 }
 
 type ComponentType uint8
@@ -100,6 +101,24 @@ func (a ActionRow) UnmarshalJSON(data []byte) error {
 
 func (a ActionRow) Type() ComponentType {
 	return ActionRowType
+}
+
+func (a ActionRow) Verify() error {
+	if len(a.Components) > 5 {
+		return ErrTooManyComponents{a.Components}
+	}
+	for _, component := range a.Components {
+		// Check the component is NOT another action row
+		if component.Type() == ActionRowType {
+			return ErrNestedActionRow{a.Components}
+		}
+
+		err := component.Verify()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type MessageComponentData struct {

@@ -147,6 +147,11 @@ func (interaction *Interaction) GetResponse() (*discord.Message, error) {
 }
 
 func (interaction *Interaction) EditResponse(data ResponseEditData) error {
+	err := data.Verify()
+	if err != nil {
+		return fmt.Errorf("error verifying edit data: %w", err)
+	}
+
 	body, err := json.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("error marshaling data to JSON: %w", err)
