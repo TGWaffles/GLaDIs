@@ -87,15 +87,19 @@ func (embed *Embed) Verify() error {
 		combinedLength += len(field.Value)
 	}
 
-	if embed.Footer != nil && len(embed.Footer.Text) > 2048 {
-		return EmbedError{embed, "embed footer text cannot be longer than 2048 characters"}
+	if embed.Footer != nil {
+		if len(embed.Footer.Text) > 2048 {
+			return EmbedError{embed, "embed footer text cannot be longer than 2048 characters"}
+		}
+		combinedLength += len(embed.Footer.Text)
 	}
-	combinedLength += len(embed.Footer.Text)
 
-	if embed.Author != nil && len(embed.Author.Name) > 256 {
-		return EmbedError{embed, "embed author name cannot be longer than 256 characters"}
+	if embed.Author != nil {
+		if len(embed.Author.Name) > 256 {
+			return EmbedError{embed, "embed author name cannot be longer than 256 characters"}
+		}
+		combinedLength += len(embed.Author.Name)
 	}
-	combinedLength += len(embed.Author.Name)
 
 	if combinedLength > 6000 {
 		return EmbedError{embed, "embed cannot be longer than 6000 characters"}
