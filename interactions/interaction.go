@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/tgwaffles/gladis/commands"
@@ -29,12 +27,16 @@ type Interaction struct {
 	AppPermissions *discord.Permissions `json:"permissions,omitempty"`
 	Locale         string               `json:"locale"`
 	GuildLocale    string               `json:"guild_locale"`
+	hook           *Webhook             `json:"-"` // Used for responding to the interaction
 }
 
 const (
 	apiUrl                       = "https://discord.com/api"
 	createInteractionResponseUrl = apiUrl + "/interactions/%d/%s/callback"
-	hookUrl                      = apiUrl + "/webhooks/%d/%s/messages/@original"
+)
+
+var (
+	httpClient = http.Client{}
 )
 
 func Parse(data string) (interaction *Interaction, err error) {
@@ -107,8 +109,7 @@ func (interaction *Interaction) CreateResponse(response InteractionResponse) err
 
 	request.Header.Set("Content-Type", "application/json")
 
-	client := http.Client{}
-	resp, err := client.Do(request)
+	resp, err := httpClient.Do(request)
 	if err != nil {
 		return fmt.Errorf("error sending HTTP request: %w", err)
 	}
@@ -121,96 +122,36 @@ func (interaction *Interaction) CreateResponse(response InteractionResponse) err
 }
 
 func (interaction *Interaction) GetResponse() (*discord.Message, error) {
-	request, err := http.NewRequest("GET", fmt.Sprintf(hookUrl, interaction.ApplicationId, interaction.Token), nil)
-	if err != nil {
-		return nil, fmt.Errorf("error creating HTTP request: %w", err)
-	}
-	request.Header.Set("Content-Type", "application/json")
-
-	client := http.Client{}
-	resp, err := client.Do(request)
-	if err != nil {
-		return nil, fmt.Errorf("error sending HTTP request: %w", err)
+	if interaction.hook == nil {
+		interaction.hook = &Webhook{
+			Id:    interaction.ApplicationId,
+			Token: &interaction.Token,
+		}
 	}
 
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("expected status code 200, got %d", resp.StatusCode)
-	}
-
-	var message discord.Message
-	err = json.NewDecoder(resp.Body).Decode(&message)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding HTTP response body: %w", err)
-	}
-
-	return &message, nil
+	return interaction.hook.GetMessage(WebhookGetMessageRequest{MessageId: "@original"})
 }
 
 func (interaction *Interaction) EditResponse(data ResponseEditData) error {
-	err := data.Verify()
-	if err != nil {
-		return fmt.Errorf("error verifying edit data: %w", err)
+	if interaction.hook == nil {
+		interaction.hook = &Webhook{
+			Id:    interaction.ApplicationId,
+			Token: &interaction.Token,
+		}
 	}
 
-	body, err := json.Marshal(data)
-	if err != nil {
-		return fmt.Errorf("error marshaling data to JSON: %w", err)
-	}
-
-	request, err := http.NewRequest("PATCH", fmt.Sprintf(hookUrl, interaction.ApplicationId, interaction.Token), bytes.NewReader(body))
-	if err != nil {
-		return fmt.Errorf("error creating HTTP request: %w", err)
-	}
-
-	request.Header.Set("Content-Type", "application/json")
-
-	client := http.Client{}
-	resp, err := client.Do(request)
-	if err != nil {
-		return fmt.Errorf("error sending HTTP request: %w", err)
-	}
-
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(resp.Body)
-	responseBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("error reading HTTP response body: %w", err)
-	}
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("expected status code 200, got %d. Response body: %s", resp.StatusCode, string(responseBody))
-	}
-
-	return nil
+	return interaction.hook.EditMessage("@original", data)
 }
 
 func (interaction *Interaction) DeleteResponse() error {
-	request, err := http.NewRequest("DELETE", fmt.Sprintf(hookUrl, interaction.ApplicationId, interaction.Token), nil)
-	if err != nil {
-		return fmt.Errorf("error creating HTTP request: %w", err)
-	}
-	request.Header.Set("Content-Type", "application/json")
-
-	client := http.Client{}
-	resp, err := client.Do(request)
-	if err != nil {
-		return fmt.Errorf("error sending HTTP request: %w", err)
+	if interaction.hook == nil {
+		interaction.hook = &Webhook{
+			Id:    interaction.ApplicationId,
+			Token: &interaction.Token,
+		}
 	}
 
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(resp.Body)
-	responseBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("error reading HTTP response body: %w", err)
-	}
-
-	if resp.StatusCode != 204 {
-		return fmt.Errorf("expected status code 204, got %d. Response body: %s", resp.StatusCode, string(responseBody))
-	}
-
-	return nil
+	return interaction.hook.DeleteMessage("@original")
 }
 
 func (interaction *Interaction) DeferResponse(isEphemeral bool) error {
