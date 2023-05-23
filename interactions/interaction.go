@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/tgwaffles/gladis/commands"
@@ -115,7 +116,14 @@ func (interaction *Interaction) CreateResponse(response InteractionResponse) err
 	}
 
 	if resp.StatusCode != 204 {
-		return fmt.Errorf("expected status code 204, got %d", resp.StatusCode)
+		responseBody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Printf("error reading HTTP response body: %v\n", err)
+			return fmt.Errorf("expected status code 204, got %d", resp.StatusCode)
+		}
+		return fmt.Errorf(
+			"error sending interaction response, status code %d (expected 204)\nresponse body: %s\nrequest body: %s",
+			resp.StatusCode, string(responseBody), string(data))
 	}
 
 	return nil
