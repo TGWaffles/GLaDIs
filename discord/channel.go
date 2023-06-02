@@ -80,7 +80,7 @@ type ThreadMetadata struct {
 }
 
 type ThreadMember struct {
-	Id            *Snowflake `json:"id,omitempty"`
+	ThreadId      *Snowflake `json:"id,omitempty"`
 	UserId        *Snowflake `json:"user_id,omitempty"`
 	JoinTimestamp time.Time  `json:"join_timestamp"`
 	Flags         int        `json:"flags"`
