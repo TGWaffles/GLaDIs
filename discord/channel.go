@@ -64,6 +64,7 @@ type Channel struct {
 }
 
 type Overwrite struct {
+	// Role or User ID
 	Id    Snowflake     `json:"id"`
 	Type  OverwriteType `json:"type"`
 	Allow string        `json:"allow"`
