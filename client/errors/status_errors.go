@@ -2,6 +2,7 @@ package errors
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -66,6 +67,6 @@ func (s StatusError) Error() string {
 		if s.Code >= 500 {
 			return "Internal Server Error"
 		}
-		return "Unknown Error"
+		return fmt.Sprintf("Unknown Error (%d)", s.Code)
 	}
 }

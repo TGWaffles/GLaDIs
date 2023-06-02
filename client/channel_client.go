@@ -54,3 +54,51 @@ func (channelClient *ChannelClient) SendMessage(messageData SendMessageData) (*d
 	}
 	return returnedMessage, nil
 }
+
+type ThreadType uint8
+
+type CreateThreadData struct {
+	Name string `json:"name"`
+
+	// Seconds
+	AutoArchiveDuration *int `json:"auto_archive_duration,omitempty"`
+
+	//  Valid types: AnnouncementThread, PublicThread, PrivateThread
+	Type discord.ChannelType `json:"type"`
+
+	// Whether non-mods can invite (only if private thread)
+	Invitable *bool `json:"invitable,omitempty"`
+
+	// Seconds
+	RateLimit *int `json:"rate_limit_per_user,omitempty"`
+
+	Reason *string `json:"-"` // Audit log reason, optional
+}
+
+func (channelClient *ChannelClient) CreateThread(threadData CreateThreadData) (*discord.Channel, error) {
+	channel := &discord.Channel{}
+	data, err := json.Marshal(threadData)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling thread creation data to JSON: %w", err)
+	}
+
+	additionalHeaders := make(map[string]string)
+
+	if threadData.Reason != nil {
+		additionalHeaders["X-Audit-Log-Reason"] = *threadData.Reason
+	}
+
+	req := DiscordRequest{
+		Method:            "POST",
+		Endpoint:          "/threads",
+		Body:              data,
+		ExpectedStatus:    201,
+		UnmarshalTo:       channel,
+		AdditionalHeaders: additionalHeaders,
+	}
+	_, err = channelClient.MakeRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	return channel, nil
+}
