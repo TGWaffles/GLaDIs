@@ -19,6 +19,7 @@ type Interaction struct {
 	DataInternal   *json.RawMessage     `json:"data,omitempty"`
 	Data           InteractionData      `json:"-"`
 	GuildId        *discord.Snowflake   `json:"guild_id,omitempty"`
+	Channel        *discord.Channel     `json:"channel,omitempty"`
 	ChannelId      *discord.Snowflake   `json:"channel_id,omitempty"`
 	Member         *discord.Member      `json:"member,omitempty"`
 	User           *discord.User        `json:"user,omitempty"`
@@ -28,7 +29,7 @@ type Interaction struct {
 	AppPermissions *discord.Permissions `json:"permissions,omitempty"`
 	Locale         string               `json:"locale"`
 	GuildLocale    string               `json:"guild_locale"`
-	hook           *Webhook             `json:"-"` // Used for responding to the interaction
+	hook           *Webhook             // Used for responding to the interaction
 }
 
 const (
