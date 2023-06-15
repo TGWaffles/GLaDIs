@@ -17,13 +17,7 @@ const (
 	GuildForumChannelType
 )
 
-const (
-	RoleOverwriteType OverwriteType = iota
-	MemberOverwriteType
-)
-
 type ChannelType uint8
-type OverwriteType uint8
 
 type Channel struct {
 	Id                            Snowflake        `json:"id"`
@@ -65,10 +59,10 @@ type Channel struct {
 
 type Overwrite struct {
 	// Role or User ID
-	Id    Snowflake     `json:"id"`
-	Type  OverwriteType `json:"type"`
-	Allow Permissions   `json:"allow"`
-	Deny  Permissions   `json:"deny"`
+	Id    Snowflake   `json:"id"`
+	Type  string      `json:"type"`
+	Allow Permissions `json:"allow"`
+	Deny  Permissions `json:"deny"`
 }
 
 type ThreadMetadata struct {
