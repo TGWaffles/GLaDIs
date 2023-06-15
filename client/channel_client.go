@@ -7,6 +7,8 @@ import (
 	"github.com/tgwaffles/gladis/components"
 	"github.com/tgwaffles/gladis/discord"
 	"net/http"
+	"net/url"
+	"strconv"
 )
 
 type ChannelClient struct {
@@ -241,4 +243,110 @@ func (channelClient *ChannelClient) FetchChannel() (*discord.Channel, error) {
 	}
 
 	return channel, nil
+}
+
+func (channelClient *ChannelClient) addThreadMember(user string) error {
+	_, err := channelClient.MakeRequest(DiscordRequest{
+		Method:         "PUT",
+		Endpoint:       "/thread-members/" + user,
+		Body:           nil,
+		ExpectedStatus: 204,
+	})
+
+	return err
+}
+
+func (channelClient *ChannelClient) JoinThread() error {
+	return channelClient.addThreadMember("@me")
+}
+
+func (channelClient *ChannelClient) AddThreadMember(userId discord.Snowflake) error {
+	return channelClient.addThreadMember(userId.String())
+}
+
+func (channelClient *ChannelClient) removeThreadMember(user string) error {
+	_, err := channelClient.MakeRequest(DiscordRequest{
+		Method:         "DELETE",
+		Endpoint:       "/thread-members/" + user,
+		Body:           nil,
+		ExpectedStatus: 204,
+	})
+
+	return err
+}
+
+func (channelClient *ChannelClient) LeaveThread() error {
+	return channelClient.removeThreadMember("@me")
+}
+
+func (channelClient *ChannelClient) RemoveThreadMember(userId discord.Snowflake) error {
+	return channelClient.removeThreadMember(userId.String())
+}
+
+type GetThreadMemberRequest struct {
+	UserId discord.Snowflake
+	// Whether to request a "member" object in the ThreadMember response, requires GUILD_MEMBERS
+	WithMember bool
+}
+
+func (channelClient *ChannelClient) GetThreadMember(request GetThreadMemberRequest) (*discord.ThreadMember, error) {
+	threadMember := &discord.ThreadMember{}
+	req := DiscordRequest{
+		Method:         "GET",
+		Endpoint:       "/thread-members/" + request.UserId.String(),
+		Body:           nil,
+		ExpectedStatus: 200,
+		UnmarshalTo:    threadMember,
+	}
+
+	if request.WithMember {
+		req.Endpoint += "?with_member=true"
+	}
+
+	_, err := channelClient.MakeRequest(req)
+	return threadMember, err
+}
+
+type ListThreadMemberRequest struct {
+	// Whether to request a "member" object in the ThreadMember response, requires GUILD_MEMBERS privileged intent
+	WithMember bool
+	// The last member fetched
+	After *discord.Snowflake
+	// Max members to fetch in one request
+	Limit *int
+}
+
+func (channelClient *ChannelClient) ListThreadMembers(request ListThreadMemberRequest) ([]discord.ThreadMember, error) {
+	threadMembers := make([]discord.ThreadMember, 0)
+
+	query := make(url.Values)
+	if request.WithMember {
+		query.Add("with_member", "true")
+	}
+	if request.After != nil {
+		query.Add("after", request.After.String())
+	}
+	if request.Limit != nil {
+		query.Add("limit", strconv.Itoa(*request.Limit))
+	}
+	endpoint := "/thread-members"
+	encodedQuery := query.Encode()
+	if len(encodedQuery) > 0 {
+		endpoint += "?" + encodedQuery
+	}
+
+	req := DiscordRequest{
+		Method:         "GET",
+		Endpoint:       endpoint,
+		Body:           nil,
+		ExpectedStatus: 200,
+		UnmarshalTo:    &threadMembers,
+	}
+
+	_, err := channelClient.MakeRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return threadMembers, nil
 }
