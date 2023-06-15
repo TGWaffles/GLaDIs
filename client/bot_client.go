@@ -1,11 +1,14 @@
 package client
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/tgwaffles/gladis/client/errors"
 	"github.com/tgwaffles/gladis/discord"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type BotClient struct {
@@ -95,4 +98,17 @@ func (botClient *BotClient) GetSelfUserClient() *UserClient {
 		UserId: discord.Snowflake(0),
 		Bot:    botClient,
 	}
+}
+
+func (botClient *BotClient) GetSelfUserID() discord.Snowflake {
+	firstPart := strings.Split(botClient.Token, ".")[0]
+	decoded, err := base64.URLEncoding.DecodeString(firstPart)
+	if err != nil {
+		panic(err)
+	}
+	parsedUserId, err := strconv.ParseUint(string(decoded), 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	return discord.Snowflake(parsedUserId)
 }
