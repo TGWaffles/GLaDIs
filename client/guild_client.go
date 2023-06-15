@@ -62,3 +62,20 @@ func (guildClient *GuildClient) GetActiveThreads() (ActiveThreadsResponse, error
 
 	return response, nil
 }
+
+func (guildClient *GuildClient) GetChannels() ([]discord.Channel, error) {
+	channels := make([]discord.Channel, 0)
+	_, err := guildClient.MakeRequest(DiscordRequest{
+		Method:         "GET",
+		Endpoint:       "/channels",
+		Body:           nil,
+		ExpectedStatus: 200,
+		UnmarshalTo:    &channels,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return channels, nil
+}
