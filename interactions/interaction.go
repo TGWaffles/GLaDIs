@@ -130,6 +130,17 @@ func (interaction *Interaction) CreateResponse(response InteractionResponse) err
 	return nil
 }
 
+func (interaction *Interaction) GetWebhook() *Webhook {
+	if interaction.hook == nil {
+		interaction.hook = &Webhook{
+			Id:    interaction.ApplicationId,
+			Token: &interaction.Token,
+		}
+	}
+
+	return interaction.hook
+}
+
 func (interaction *Interaction) GetResponse() (*discord.Message, error) {
 	if interaction.hook == nil {
 		interaction.hook = &Webhook{
