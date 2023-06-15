@@ -67,8 +67,8 @@ type Overwrite struct {
 	// Role or User ID
 	Id    Snowflake     `json:"id"`
 	Type  OverwriteType `json:"type"`
-	Allow string        `json:"allow"`
-	Deny  string        `json:"deny"`
+	Allow Permissions   `json:"allow"`
+	Deny  Permissions   `json:"deny"`
 }
 
 type ThreadMetadata struct {
