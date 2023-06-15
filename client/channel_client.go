@@ -225,3 +225,20 @@ func (channelClient *ChannelClient) Edit(data ModifyChannelData) (*discord.Chann
 	}
 	return channel, nil
 }
+
+func (channelClient *ChannelClient) FetchChannel() (*discord.Channel, error) {
+	channel := &discord.Channel{}
+	_, err := channelClient.MakeRequest(DiscordRequest{
+		Method:         "GET",
+		Endpoint:       "",
+		Body:           nil,
+		ExpectedStatus: 200,
+		UnmarshalTo:    channel,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return channel, nil
+}
