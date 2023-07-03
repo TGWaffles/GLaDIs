@@ -82,35 +82,43 @@ func (hook *Webhook) GetUrl() string {
 	return *hook.Url
 }
 
-func (hook *Webhook) Send(req WebhookRequest) (err error) {
+func (hook *Webhook) Send(req WebhookRequest) (returnedMessage *discord.Message, err error) {
 	data, err := json.Marshal(req)
 	if err != nil {
-		return fmt.Errorf("error marshaling data to JSON: %w", err)
+		return nil, fmt.Errorf("error marshaling data to JSON: %w", err)
 	}
 	request, err := http.NewRequest("POST", hook.GetUrl(), bytes.NewReader(data))
 	if err != nil {
-		return fmt.Errorf("error creating HTTP request: %w", err)
+		return nil, fmt.Errorf("error creating HTTP request: %w", err)
 	}
 
 	request.Header.Set("Content-Type", "application/json")
 
 	resp, err := httpClient.Do(request)
 	if err != nil {
-		return fmt.Errorf("error sending HTTP request: %w", err)
+		return nil, fmt.Errorf("error sending HTTP request: %w", err)
 	}
 
-	if resp.StatusCode != 204 {
+	if resp.StatusCode > 300 {
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Printf("error reading HTTP response body: %v\n", err)
-			return fmt.Errorf("expected status code 204, got %d", resp.StatusCode)
+			return nil, fmt.Errorf("expected status code 2xx, got %d", resp.StatusCode)
 		}
-		return fmt.Errorf(
-			"error sending interaction response, status code %d (expected 204)\nresponse body: %s\nrequest body: %s",
+		return nil, fmt.Errorf(
+			"error sending webhook, status code %d (expected 2xx)\nresponse body: %s\nrequest body: %s",
 			resp.StatusCode, string(responseBody), string(data))
 	}
 
-	return nil
+	if resp.StatusCode == 200 {
+		returnedMessage = &discord.Message{}
+		err = json.NewDecoder(resp.Body).Decode(returnedMessage)
+		if err != nil {
+			return nil, fmt.Errorf("error unmarshalling response: %w", err)
+		}
+	}
+
+	return returnedMessage, nil
 }
 
 type WebhookGetMessageRequest struct {
