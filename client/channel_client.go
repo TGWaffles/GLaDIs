@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/tgwaffles/gladis/components"
 	"github.com/tgwaffles/gladis/discord"
+	"github.com/tgwaffles/gladis/interactions"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -51,6 +52,32 @@ func (channelClient *ChannelClient) SendMessage(messageData SendMessageData) (*d
 		ExpectedStatus: 200,
 		UnmarshalTo:    returnedMessage,
 	}
+	_, err = channelClient.MakeRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	return returnedMessage, nil
+}
+
+func (channelClient *ChannelClient) EditMessage(messageId uint64, editData interactions.ResponseEditData) (*discord.Message, error) {
+	err := editData.Verify()
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify response edit data validity: %w", err)
+	}
+	returnedMessage := &discord.Message{}
+	data, err := json.Marshal(editData)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling response edit data to JSON: %w", err)
+	}
+
+	req := DiscordRequest{
+		Method:         "PATCH",
+		Endpoint:       fmt.Sprintf("/messages/%d", messageId),
+		Body:           data,
+		ExpectedStatus: 200,
+		UnmarshalTo:    returnedMessage,
+	}
+
 	_, err = channelClient.MakeRequest(req)
 	if err != nil {
 		return nil, err
