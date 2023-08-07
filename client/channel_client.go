@@ -59,7 +59,7 @@ func (channelClient *ChannelClient) SendMessage(messageData SendMessageData) (*d
 	return returnedMessage, nil
 }
 
-func (channelClient *ChannelClient) EditMessage(messageId uint64, editData interactions.ResponseEditData) (*discord.Message, error) {
+func (channelClient *ChannelClient) EditMessage(messageId discord.Snowflake, editData interactions.ResponseEditData) (*discord.Message, error) {
 	err := editData.Verify()
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify response edit data validity: %w", err)
