@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/tgwaffles/gladis/discord/interaction_callback_type"
 	"github.com/tgwaffles/gladis/discord/interaction_type"
 	"io/ioutil"
 	"net/http"
@@ -181,7 +182,7 @@ func (interaction *Interaction) DeferResponse(isEphemeral bool) error {
 	}
 
 	response := InteractionResponse{
-		Type: DeferredChannelMessageWithSourceInteractionCallbackType,
+		Type: interaction_callback_type.DeferredChannelMessageWithSource,
 		Data: &MessageCallbackData{
 			Flags: flags,
 		},

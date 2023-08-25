@@ -4,23 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/tgwaffles/gladis/discord/interaction_callback_type"
 )
-
-const (
-	PongInteractionCallbackType                     InteractionCallbackType = iota + 1
-	ChannelMessageWithSourceInteractionCallbackType                         = iota + 3
-	DeferredChannelMessageWithSourceInteractionCallbackType
-	DeferredUpdateMessageInteractionCallbackType
-	UpdateMessageInteractionCallbackType
-	ApplicationCommandAutocompleteResultInteractionCallbackType
-	ModalInteractionCallbackType
-)
-
-type InteractionCallbackType uint8
 
 type InteractionResponse struct {
-	Type InteractionCallbackType `json:"type"`
-	Data InteractionCallbackData `json:"data,omitempty"`
+	Type interaction_callback_type.InteractionCallbackType `json:"type"`
+	Data InteractionCallbackData                           `json:"data,omitempty"`
 }
 
 func (ir InteractionResponse) ToAPIGatewayResponse() events.APIGatewayProxyResponse {
@@ -97,18 +86,18 @@ type ModalCallback struct {
 
 func CreatePongResponse() InteractionResponse {
 	return InteractionResponse{
-		Type: PongInteractionCallbackType,
+		Type: interaction_callback_type.Pong,
 	}
 }
 
 func CreateDeferMessageResponse() InteractionResponse {
 	return InteractionResponse{
-		Type: DeferredChannelMessageWithSourceInteractionCallbackType,
+		Type: interaction_callback_type.DeferredChannelMessageWithSource,
 	}
 }
 
 func CreateDeferEditResponse() InteractionResponse {
 	return InteractionResponse{
-		Type: DeferredUpdateMessageInteractionCallbackType,
+		Type: interaction_callback_type.DeferredUpdateMessage,
 	}
 }
