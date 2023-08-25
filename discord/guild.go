@@ -56,18 +56,3 @@ type WelcomeScreenChannel struct {
 	EmojiId     *Snowflake `json:"emoji_id,omitempty"`
 	EmojiName   *string    `json:"emoji_name,omitempty"`
 }
-
-type Sticker struct {
-	Id          Snowflake  `json:"id"`
-	PackId      *Snowflake `json:"pack_id,omitempty"`
-	Name        string     `json:"name"`
-	Description *string    `json:"description,omitempty"`
-	Tags        *string    `json:"tags,omitempty"`
-	Asset       *string    `json:"asset,omitempty"`
-	Type        int        `json:"type"`
-	FormatType  int        `json:"format_type"`
-	Available   *bool      `json:"available,omitempty"`
-	GuildId     *Snowflake `json:"guild_id,omitempty"`
-	User        *User      `json:"user,omitempty"`
-	SortValue   *int       `json:"sort_value,omitempty"`
-}
