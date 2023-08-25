@@ -1,27 +1,30 @@
-package components
+package discord
 
-import "github.com/tgwaffles/gladis/discord"
+import (
+	"github.com/tgwaffles/gladis/discord/channel_type"
+	"github.com/tgwaffles/gladis/discord/component_type"
+)
 
 type SelectMenu struct {
-	MenuType     ComponentType         `json:"type"`
-	CustomId     string                `json:"custom_id"`
-	Options      []SelectOption        `json:"options,omitempty"`
-	ChannelTypes []discord.ChannelType `json:"channel_types,omitempty"`
-	Placeholder  *string               `json:"placeholder,omitempty"`
-	MinValues    *uint8                `json:"min_values,omitempty"`
-	MaxValues    *uint8                `json:"max_values,omitempty"`
-	Disabled     *bool                 `json:"disabled,omitempty"`
+	MenuType     component_type.ComponentType `json:"type"`
+	CustomId     string                       `json:"custom_id"`
+	Options      []SelectOption               `json:"options,omitempty"`
+	ChannelTypes []channel_type.ChannelType   `json:"channel_types,omitempty"`
+	Placeholder  *string                      `json:"placeholder,omitempty"`
+	MinValues    *uint8                       `json:"min_values,omitempty"`
+	MaxValues    *uint8                       `json:"max_values,omitempty"`
+	Disabled     *bool                        `json:"disabled,omitempty"`
 }
 
 type SelectOption struct {
-	Label       string         `json:"label"`
-	Value       string         `json:"value"`
-	Description *string        `json:"description,omitempty"`
-	Emoji       *discord.Emoji `json:"emoji,omitempty"`
-	Default     *bool          `json:"default,omitempty"`
+	Label       string  `json:"label"`
+	Value       string  `json:"value"`
+	Description *string `json:"description,omitempty"`
+	Emoji       *Emoji  `json:"emoji,omitempty"`
+	Default     *bool   `json:"default,omitempty"`
 }
 
-func (selectMenu SelectMenu) Type() ComponentType {
+func (selectMenu SelectMenu) Type() component_type.ComponentType {
 	return selectMenu.MenuType
 }
 
@@ -40,9 +43,9 @@ func (selectMenu SelectMenu) Verify() error {
 		}
 	}
 
-	if selectMenu.Options == nil && selectMenu.MenuType == StringSelectType {
+	if selectMenu.Options == nil && selectMenu.MenuType == component_type.StringSelect {
 		return ErrStringSelectMenuMustHaveOptions{selectMenu}
-	} else if selectMenu.Options != nil && selectMenu.MenuType != StringSelectType {
+	} else if selectMenu.Options != nil && selectMenu.MenuType != component_type.StringSelect {
 		return ErrNonStringSelectMenuCannotHaveOptions{selectMenu}
 	}
 

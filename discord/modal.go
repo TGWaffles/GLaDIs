@@ -1,20 +1,15 @@
-package components
+package discord
 
 import (
 	"encoding/json"
-)
-
-const (
-	ShortTextInputStyle TextInputStyle = iota + 1
-	LongTextInputStyle
+	"github.com/tgwaffles/gladis/discord/component_type"
+	"github.com/tgwaffles/gladis/discord/text_input_style"
 )
 
 type ModalSubmitData struct {
 	CustomId   string             `json:"custom_id"`
 	Components []MessageComponent `json:"components"`
 }
-
-type TextInputStyle uint8
 
 func (m ModalSubmitData) UnmarshalJSON(data []byte) error {
 	dataMap := make(map[string]interface{})
@@ -39,15 +34,15 @@ func (m ModalSubmitData) UnmarshalJSON(data []byte) error {
 }
 
 type TextInput struct {
-	TextInputType ComponentType  `json:"type"`
-	CustomId      string         `json:"custom_id"`
-	Style         TextInputStyle `json:"style"`
-	Label         string         `json:"label"`
-	MinLength     int            `json:"min_length"`
-	MaxLength     int            `json:"max_length"`
-	Required      bool           `json:"required"`
-	Value         string         `json:"value"`
-	Placeholder   string         `json:"placeholder"`
+	TextInputType component_type.ComponentType    `json:"type"`
+	CustomId      string                          `json:"custom_id"`
+	Style         text_input_style.TextInputStyle `json:"style"`
+	Label         string                          `json:"label"`
+	MinLength     int                             `json:"min_length"`
+	MaxLength     int                             `json:"max_length"`
+	Required      bool                            `json:"required"`
+	Value         string                          `json:"value"`
+	Placeholder   string                          `json:"placeholder"`
 }
 
 func (t TextInput) MarshalJSON() ([]byte, error) {
@@ -55,13 +50,13 @@ func (t TextInput) MarshalJSON() ([]byte, error) {
 
 	var inner Alias
 	inner = Alias(t)
-	inner.TextInputType = TextInputType
+	inner.TextInputType = component_type.TextInput
 
 	return json.Marshal(inner)
 }
 
-func (t TextInput) Type() ComponentType {
-	return TextInputType
+func (t TextInput) Type() component_type.ComponentType {
+	return component_type.TextInput
 }
 
 func (t TextInput) Verify() error {

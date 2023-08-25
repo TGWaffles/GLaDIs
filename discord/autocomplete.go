@@ -1,4 +1,4 @@
-package commands
+package discord
 
 type AutoCompleteChoice struct {
 	Name              string             `json:"name"`

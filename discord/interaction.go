@@ -1,35 +1,35 @@
-package interactions
+package discord
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/tgwaffles/gladis/discord/interaction_type"
 	"io/ioutil"
 	"net/http"
-
-	"github.com/tgwaffles/gladis/commands"
-	"github.com/tgwaffles/gladis/components"
-	"github.com/tgwaffles/gladis/discord"
 )
 
 type Interaction struct {
-	Id             discord.Snowflake    `json:"id"`
-	ApplicationId  discord.Snowflake    `json:"application_id"`
-	Type           InteractionType      `json:"type"`
-	DataInternal   *json.RawMessage     `json:"data,omitempty"`
-	Data           InteractionData      `json:"-"`
-	GuildId        *discord.Snowflake   `json:"guild_id,omitempty"`
-	Channel        *discord.Channel     `json:"channel,omitempty"`
-	ChannelId      *discord.Snowflake   `json:"channel_id,omitempty"`
-	Member         *discord.Member      `json:"member,omitempty"`
-	User           *discord.User        `json:"user,omitempty"`
-	Token          string               `json:"token"`
-	Version        int                  `json:"version"`
-	Message        *discord.Message     `json:"message,omitempty"`
-	AppPermissions *discord.Permissions `json:"permissions,omitempty"`
-	Locale         string               `json:"locale"`
-	GuildLocale    string               `json:"guild_locale"`
-	hook           *Webhook             // Used for responding to the interaction
+	Id             Snowflake                        `json:"id"`
+	ApplicationId  Snowflake                        `json:"application_id"`
+	Type           interaction_type.InteractionType `json:"type"`
+	DataInternal   *json.RawMessage                 `json:"data,omitempty"`
+	Data           InteractionData                  `json:"-"`
+	GuildId        *Snowflake                       `json:"guild_id,omitempty"`
+	Channel        *Channel                         `json:"channel,omitempty"`
+	ChannelId      *Snowflake                       `json:"channel_id,omitempty"`
+	Member         *Member                          `json:"member,omitempty"`
+	User           *User                            `json:"user,omitempty"`
+	Token          string                           `json:"token"`
+	Version        int                              `json:"version"`
+	Message        *Message                         `json:"message,omitempty"`
+	AppPermissions *Permissions                     `json:"permissions,omitempty"`
+	Locale         string                           `json:"locale"`
+	GuildLocale    string                           `json:"guild_locale"`
+	hook           *Webhook                         // Used for responding to the interaction
+}
+
+type InteractionData interface {
 }
 
 const (
@@ -73,21 +73,21 @@ func (interaction *Interaction) createData() (err error) {
 	}
 
 	switch interaction.Type {
-	case PingInteractionType:
-		// PingInteractionType has no data
+	case interaction_type.Ping:
+		// Ping has no data
 		return
-	case ApplicationCommandInteractionType, ApplicationCommandAutocompleteInteractionType:
-		appCommandData := commands.ApplicationCommandData{}
+	case interaction_type.ApplicationCommand, interaction_type.ApplicationCommandAutocomplete:
+		appCommandData := ApplicationCommandData{}
 		err = json.Unmarshal(*interaction.DataInternal, &appCommandData)
 		interaction.Data = &appCommandData
 		break
-	case MessageComponentInteractionType:
-		messageComponentData := components.MessageComponentData{}
+	case interaction_type.MessageComponent:
+		messageComponentData := MessageComponentData{}
 		err = json.Unmarshal(*interaction.DataInternal, &messageComponentData)
 		interaction.Data = &messageComponentData
 		break
-	case ModalSubmitInteractionType:
-		modalSubmitData := components.ModalSubmitData{}
+	case interaction_type.ModalSubmit:
+		modalSubmitData := ModalSubmitData{}
 		err = json.Unmarshal(*interaction.DataInternal, &modalSubmitData)
 		interaction.Data = &modalSubmitData
 		break
@@ -96,7 +96,7 @@ func (interaction *Interaction) createData() (err error) {
 }
 
 func (interaction *Interaction) IsPing() bool {
-	return interaction.Type == PingInteractionType
+	return interaction.Type == interaction_type.Ping
 }
 
 func (interaction *Interaction) CreateResponse(response InteractionResponse) error {
@@ -141,7 +141,7 @@ func (interaction *Interaction) GetWebhook() *Webhook {
 	return interaction.hook
 }
 
-func (interaction *Interaction) GetResponse() (*discord.Message, error) {
+func (interaction *Interaction) GetResponse() (*Message, error) {
 	if interaction.hook == nil {
 		interaction.hook = &Webhook{
 			Id:    interaction.ApplicationId,

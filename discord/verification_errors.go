@@ -1,8 +1,9 @@
-package components
+package discord
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tgwaffles/gladis/discord/allowed_mention_type"
 )
 
 type ErrTooManyComponents struct {
@@ -210,4 +211,21 @@ func (e ErrSelectOptionMustHaveValue) Error() string {
 	}
 
 	return fmt.Sprintf("select option must have value\nOption:%s\n", optionRepresentation)
+}
+
+type ErrInvalidParseGroup struct {
+	InvalidGroup  allowed_mention_type.AllowedMentionType
+	MentionObject AllowedMentions
+}
+
+func (e ErrInvalidParseGroup) Error() string {
+	var jsonRepresentation string
+	jsonMarshalled, err := json.Marshal(e.MentionObject)
+	if err != nil {
+		jsonRepresentation = fmt.Sprintf("%v", e.MentionObject)
+	} else {
+		jsonRepresentation = string(jsonMarshalled)
+	}
+
+	return fmt.Sprintf("invalid parse group \"%s\"\nif you have this parse group, you cannot also provide options for the %s field in the allowed mentions object: %s\n", e.InvalidGroup, e.InvalidGroup, jsonRepresentation)
 }

@@ -4,9 +4,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/tgwaffles/gladis/components"
 	"github.com/tgwaffles/gladis/discord"
-	"github.com/tgwaffles/gladis/interactions"
+	"github.com/tgwaffles/gladis/discord/channel_type"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -23,10 +22,10 @@ type SendMessageData struct {
 	Embeds          []discord.Embed          `json:"embeds,omitempty"`
 	AllowedMentions *discord.AllowedMentions `json:"allowed_mentions,omitempty"`
 	// Channel ID optional
-	MessageReference *discord.MessageReference     `json:"message_reference,omitempty"`
-	Components       []components.MessageComponent `json:"components,omitempty"`
-	StickerIds       []discord.Snowflake           `json:"sticker_ids,omitempty"`
-	Attachments      []discord.Attachment          `json:"attachments,omitempty"`
+	MessageReference *discord.MessageReference  `json:"message_reference,omitempty"`
+	Components       []discord.MessageComponent `json:"components,omitempty"`
+	StickerIds       []discord.Snowflake        `json:"sticker_ids,omitempty"`
+	Attachments      []discord.Attachment       `json:"attachments,omitempty"`
 	// Only supports "SUPPRESS_EMBEDS" (1<<2) and "SUPPRESS_NOTIFICATIONS" (1<<12)
 	Flags *int `json:"flags,omitempty"`
 }
@@ -59,7 +58,7 @@ func (channelClient *ChannelClient) SendMessage(messageData SendMessageData) (*d
 	return returnedMessage, nil
 }
 
-func (channelClient *ChannelClient) EditMessage(messageId discord.Snowflake, editData interactions.ResponseEditData) (*discord.Message, error) {
+func (channelClient *ChannelClient) EditMessage(messageId discord.Snowflake, editData discord.ResponseEditData) (*discord.Message, error) {
 	err := editData.Verify()
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify response edit data validity: %w", err)
@@ -94,7 +93,7 @@ type CreateThreadData struct {
 	AutoArchiveDuration *int `json:"auto_archive_duration,omitempty"`
 
 	//  Valid types: AnnouncementThread, PublicThread, PrivateThread
-	Type discord.ChannelType `json:"type"`
+	Type channel_type.ChannelType `json:"type"`
 
 	// Whether non-mods can invite (only if private thread)
 	Invitable *bool `json:"invitable,omitempty"`
@@ -164,10 +163,10 @@ func (modifyData ModifyGroupDMChannelData) GetReason() *string {
 type ModifyGuildChannelData struct {
 	Name *string `json:"name,omitempty"`
 	// Can only switch between text and announcement channels
-	Type     *discord.ChannelType `json:"type,omitempty"`
-	Position *int                 `json:"position,omitempty"`
-	Topic    *string              `json:"topic,omitempty"`
-	NSFW     *bool                `json:"nsfw,omitempty"`
+	Type     *channel_type.ChannelType `json:"type,omitempty"`
+	Position *int                      `json:"position,omitempty"`
+	Topic    *string                   `json:"topic,omitempty"`
+	NSFW     *bool                     `json:"nsfw,omitempty"`
 	// Slow-mode (in seconds)
 	RateLimit *int `json:"rate_limit_per_user,omitempty"`
 

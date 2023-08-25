@@ -1,17 +1,15 @@
-package commands
+package discord
 
-import (
-	"github.com/tgwaffles/gladis/discord"
-)
+import "github.com/tgwaffles/gladis/discord/command_type"
 
 type ApplicationCommandData struct {
-	Id        discord.Snowflake          `json:"id"`
-	Name      string                     `json:"name"`
-	Type      ApplicationCommandType     `json:"type"`
-	Resolved  *discord.ResolvedData      `json:"resolved,omitempty"`
-	Options   []ApplicationCommandOption `json:"options,omitempty"`
-	GuildId   *discord.Snowflake         `json:"guild_id,omitempty"`
-	TargetId  *discord.Snowflake         `json:"target_id,omitempty"`
+	Id        Snowflake                           `json:"id"`
+	Name      string                              `json:"name"`
+	Type      command_type.ApplicationCommandType `json:"type"`
+	Resolved  *ResolvedData                       `json:"resolved,omitempty"`
+	Options   []ApplicationCommandOption          `json:"options,omitempty"`
+	GuildId   *Snowflake                          `json:"guild_id,omitempty"`
+	TargetId  *Snowflake                          `json:"target_id,omitempty"`
 	optionMap map[string]ApplicationCommandOption
 }
 

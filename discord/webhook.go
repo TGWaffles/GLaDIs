@@ -1,11 +1,9 @@
-package interactions
+package discord
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/tgwaffles/gladis/components"
-	"github.com/tgwaffles/gladis/discord"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -18,34 +16,34 @@ const (
 )
 
 type WebhookRequest struct {
-	Content         *string                       `json:"content,omitempty"`
-	Username        string                        `json:"username,omitempty"`
-	AvatarUrl       string                        `json:"avatar_url,omitempty"`
-	TTS             *bool                         `json:"tts,omitempty"`
-	Embeds          []discord.Embed               `json:"embeds,omitempty"`
-	AllowedMentions *discord.AllowedMentions      `json:"allowed_mentions,omitempty"`
-	Flags           *int                          `json:"flags,omitempty"`
-	Components      []components.MessageComponent `json:"components,omitempty"`
-	Attachments     []discord.Attachment          `json:"attachments,omitempty"`
-	ThreadName      string                        `json:"thread_name,omitempty"`
+	Content         *string            `json:"content,omitempty"`
+	Username        string             `json:"username,omitempty"`
+	AvatarUrl       string             `json:"avatar_url,omitempty"`
+	TTS             *bool              `json:"tts,omitempty"`
+	Embeds          []Embed            `json:"embeds,omitempty"`
+	AllowedMentions *AllowedMentions   `json:"allowed_mentions,omitempty"`
+	Flags           *int               `json:"flags,omitempty"`
+	Components      []MessageComponent `json:"components,omitempty"`
+	Attachments     []Attachment       `json:"attachments,omitempty"`
+	ThreadName      string             `json:"thread_name,omitempty"`
 }
 
 type WebhookMessageResponse struct {
 }
 
 type Webhook struct {
-	Id            discord.Snowflake  `json:"id"`
-	Type          uint8              `json:"type"`
-	GuildId       *discord.Snowflake `json:"guild_id,omitempty"`
-	ChannelId     *discord.Snowflake `json:"channel_id,omitempty"`
-	User          *discord.User      `json:"user,omitempty"`
-	Name          *string            `json:"name,omitempty"`
-	Avatar        *string            `json:"avatar,omitempty"`
-	Token         *string            `json:"token,omitempty"`
-	ApplicationId *discord.Snowflake `json:"application_id,omitempty"`
-	SourceGuild   *discord.Guild     `json:"source_guild,omitempty"`
-	SourceChannel *discord.Channel   `json:"source_channel,omitempty"`
-	Url           *string            `json:"url,omitempty"`
+	Id            Snowflake  `json:"id"`
+	Type          uint8      `json:"type"`
+	GuildId       *Snowflake `json:"guild_id,omitempty"`
+	ChannelId     *Snowflake `json:"channel_id,omitempty"`
+	User          *User      `json:"user,omitempty"`
+	Name          *string    `json:"name,omitempty"`
+	Avatar        *string    `json:"avatar,omitempty"`
+	Token         *string    `json:"token,omitempty"`
+	ApplicationId *Snowflake `json:"application_id,omitempty"`
+	SourceGuild   *Guild     `json:"source_guild,omitempty"`
+	SourceChannel *Channel   `json:"source_channel,omitempty"`
+	Url           *string    `json:"url,omitempty"`
 }
 
 func WebhookFromUrl(url string) (webhook *Webhook, err error) {
@@ -65,7 +63,7 @@ func WebhookFromUrl(url string) (webhook *Webhook, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid webhook url - invalid id (given: %s), error: %w", splitUrl[0], err)
 	}
-	webhook.Id = discord.Snowflake(webhookId)
+	webhook.Id = Snowflake(webhookId)
 	token := strings.Trim(splitUrl[1], "/ \n\r\t") // Trim trailing slashes and whitespace
 	webhook.Token = &token
 	webhook.Url = &url
@@ -82,7 +80,7 @@ func (hook *Webhook) GetUrl() string {
 	return *hook.Url
 }
 
-func (hook *Webhook) Send(req WebhookRequest) (returnedMessage *discord.Message, err error) {
+func (hook *Webhook) Send(req WebhookRequest) (returnedMessage *Message, err error) {
 	data, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling data to JSON: %w", err)
@@ -111,7 +109,7 @@ func (hook *Webhook) Send(req WebhookRequest) (returnedMessage *discord.Message,
 	}
 
 	if resp.StatusCode == 200 {
-		returnedMessage = &discord.Message{}
+		returnedMessage = &Message{}
 		err = json.NewDecoder(resp.Body).Decode(returnedMessage)
 		if err != nil {
 			return nil, fmt.Errorf("error unmarshalling response: %w", err)
@@ -123,11 +121,11 @@ func (hook *Webhook) Send(req WebhookRequest) (returnedMessage *discord.Message,
 
 type WebhookGetMessageRequest struct {
 	// String so it can be "@original"
-	MessageId string             `json:"-"` // Not sent in request body
-	ThreadId  *discord.Snowflake `json:"thread_id,omitempty"`
+	MessageId string     `json:"-"` // Not sent in request body
+	ThreadId  *Snowflake `json:"thread_id,omitempty"`
 }
 
-func (hook *Webhook) GetMessage(req WebhookGetMessageRequest) (message *discord.Message, err error) {
+func (hook *Webhook) GetMessage(req WebhookGetMessageRequest) (message *Message, err error) {
 	var body io.Reader
 	if req.ThreadId != nil {
 		data, err := json.Marshal(req)

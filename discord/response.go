@@ -1,12 +1,9 @@
-package interactions
+package discord
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/tgwaffles/gladis/commands"
-	"github.com/tgwaffles/gladis/components"
-	"github.com/tgwaffles/gladis/discord"
 )
 
 const (
@@ -48,20 +45,20 @@ type InteractionCallbackData interface {
 }
 
 type MessageCallbackData struct {
-	TTS             *bool                         `json:"tts,omitempty"`
-	Content         *string                       `json:"content,omitempty"`
-	Embeds          []discord.Embed               `json:"embeds,omitempty"`
-	AllowedMentions *discord.AllowedMentions      `json:"allowed_mentions,omitempty"`
-	Flags           *int                          `json:"flags,omitempty"`
-	Components      []components.MessageComponent `json:"components,omitempty"`
-	Attachments     []discord.Attachment          `json:"attachments,omitempty"`
+	TTS             *bool              `json:"tts,omitempty"`
+	Content         *string            `json:"content,omitempty"`
+	Embeds          []Embed            `json:"embeds,omitempty"`
+	AllowedMentions *AllowedMentions   `json:"allowed_mentions,omitempty"`
+	Flags           *int               `json:"flags,omitempty"`
+	Components      []MessageComponent `json:"components,omitempty"`
+	Attachments     []Attachment       `json:"attachments,omitempty"`
 }
 
 type ResponseEditData struct {
-	Content         *string                       `json:"content,omitempty"`
-	Embeds          []discord.Embed               `json:"embeds,omitempty"`
-	AllowedMentions *discord.AllowedMentions      `json:"allowed_mentions"`
-	Components      []components.MessageComponent `json:"components"`
+	Content         *string            `json:"content,omitempty"`
+	Embeds          []Embed            `json:"embeds,omitempty"`
+	AllowedMentions *AllowedMentions   `json:"allowed_mentions"`
+	Components      []MessageComponent `json:"components"`
 }
 
 func (data ResponseEditData) Verify() error {
@@ -89,13 +86,13 @@ func (data ResponseEditData) Verify() error {
 }
 
 type AutocompleteCallbackData struct {
-	Choices []commands.AutoCompleteChoice `json:"choices"`
+	Choices []AutoCompleteChoice `json:"choices"`
 }
 
 type ModalCallback struct {
-	CustomId   string                        `json:"custom_id"`
-	Title      string                        `json:"title"`
-	Components []components.MessageComponent `json:"components"`
+	CustomId   string             `json:"custom_id"`
+	Title      string             `json:"title"`
+	Components []MessageComponent `json:"components"`
 }
 
 func CreatePongResponse() InteractionResponse {
