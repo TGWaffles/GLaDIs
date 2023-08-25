@@ -42,7 +42,7 @@ var (
 	httpClient = http.Client{}
 )
 
-func Parse(data string) (interaction *Interaction, err error) {
+func ParseInteraction(data string) (interaction *Interaction, err error) {
 	err = json.Unmarshal([]byte(data), &interaction)
 	return interaction, err
 }
