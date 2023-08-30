@@ -41,6 +41,6 @@ func (i *Snowflake) UnmarshalJSON(b []byte) error {
 	return json.Unmarshal(b, (*uint64)(i))
 }
 
-func (i Snowflake) String() string {
-	return strconv.FormatUint(uint64(i), 10)
+func (i *Snowflake) String() string {
+	return strconv.FormatUint(uint64(*i), 10)
 }

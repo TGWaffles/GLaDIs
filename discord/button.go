@@ -16,21 +16,21 @@ type Button struct {
 	ButtonType component_type.ComponentType `json:"type"`
 }
 
-func (button Button) MarshalJSON() ([]byte, error) {
+func (button *Button) MarshalJSON() ([]byte, error) {
 	type Alias Button
 
 	var inner Alias
-	inner = Alias(button)
+	inner = Alias(*button)
 	inner.ButtonType = component_type.Button
 
 	return json.Marshal(inner)
 }
 
-func (button Button) Type() component_type.ComponentType {
+func (button *Button) Type() component_type.ComponentType {
 	return component_type.Button
 }
 
-func (button Button) Verify() error {
+func (button *Button) Verify() error {
 	if button.Style == button_style.Link {
 		if button.CustomId != nil {
 			return ErrLinkButtonCannotHaveCustomId{button}

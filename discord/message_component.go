@@ -14,31 +14,31 @@ func (m *MessageComponentWrapper) MarshalJSON() ([]byte, error) {
 }
 
 func (m *MessageComponentWrapper) UnmarshalJSON(data []byte) error {
-	var component MessageComponent
-	err := json.Unmarshal(data, &component)
+	var componentMap map[string]interface{}
+	err := json.Unmarshal(data, &componentMap)
 	if err != nil {
 		return err
 	}
-	switch component.Type() {
+	switch component_type.ComponentType(componentMap["type"].(float64)) {
 	case component_type.ActionRow:
 		var actionRow ActionRow
 		err = json.Unmarshal(data, &actionRow)
-		m.component = actionRow
+		m.component = &actionRow
 		break
 	case component_type.Button:
 		var button Button
 		err = json.Unmarshal(data, &button)
-		m.component = button
+		m.component = &button
 		break
 	case component_type.StringSelect, component_type.UserSelect, component_type.RoleSelect, component_type.MentionableSelect, component_type.ChannelSelect:
 		var selectMenu SelectMenu
 		err = json.Unmarshal(data, &selectMenu)
-		m.component = selectMenu
+		m.component = &selectMenu
 		break
 	case component_type.TextInput:
 		var textInput TextInput
 		err = json.Unmarshal(data, &textInput)
-		m.component = textInput
+		m.component = &textInput
 		break
 	}
 	return err
@@ -55,28 +55,35 @@ type ActionRow struct {
 	Components []MessageComponent           `json:"components"`
 }
 
-func (a ActionRow) MarshalJSON() ([]byte, error) {
+func (a *ActionRow) MarshalJSON() ([]byte, error) {
 	type Alias ActionRow
 
 	var inner Alias
-	inner = Alias(a)
+	inner = Alias(*a)
 	inner.RowType = component_type.ActionRow
 
 	return json.Marshal(inner)
 }
 
-func (a ActionRow) UnmarshalJSON(data []byte) error {
-	dataMap := make(map[string]interface{})
+func (a *ActionRow) UnmarshalJSON(data []byte) error {
+	if a.Components == nil {
+		a.Components = make([]MessageComponent, 0)
+	}
+	dataMap := make(map[string]json.RawMessage)
 	err := json.Unmarshal(data, &dataMap)
 	if err != nil {
 		return err
 	}
 
 	a.RowType = component_type.ActionRow
-	components := dataMap["components"].([]interface{})
+	var components []json.RawMessage
+	err = json.Unmarshal(dataMap["components"], &components)
+	if err != nil {
+		return err
+	}
 	for _, component := range components {
 		var messageComponent MessageComponentWrapper
-		err = json.Unmarshal([]byte(component.(string)), &messageComponent)
+		err = json.Unmarshal(component, &messageComponent)
 		if err != nil {
 			return err
 		}
@@ -86,11 +93,11 @@ func (a ActionRow) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a ActionRow) Type() component_type.ComponentType {
+func (a *ActionRow) Type() component_type.ComponentType {
 	return component_type.ActionRow
 }
 
-func (a ActionRow) Verify() error {
+func (a *ActionRow) Verify() error {
 	if len(a.Components) > 5 {
 		return ErrTooManyComponents{a.Components}
 	}

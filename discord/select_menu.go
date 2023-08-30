@@ -24,11 +24,11 @@ type SelectOption struct {
 	Default     *bool   `json:"default,omitempty"`
 }
 
-func (selectMenu SelectMenu) Type() component_type.ComponentType {
+func (selectMenu *SelectMenu) Type() component_type.ComponentType {
 	return selectMenu.MenuType
 }
 
-func (selectMenu SelectMenu) Verify() error {
+func (selectMenu *SelectMenu) Verify() error {
 	if selectMenu.CustomId == "" {
 		return ErrComponentMustHaveCustomId{selectMenu}
 	}

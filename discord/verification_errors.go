@@ -37,7 +37,7 @@ func (e ErrNestedActionRow) Error() string {
 }
 
 type ErrLinkButtonCannotHaveCustomId struct {
-	Component Button
+	Component *Button
 }
 
 func (e ErrLinkButtonCannotHaveCustomId) Error() string {
@@ -52,7 +52,7 @@ func (e ErrLinkButtonCannotHaveCustomId) Error() string {
 }
 
 type ErrLinkButtonMustHaveUrl struct {
-	Component Button
+	Component *Button
 }
 
 func (e ErrLinkButtonMustHaveUrl) Error() string {
@@ -67,7 +67,7 @@ func (e ErrLinkButtonMustHaveUrl) Error() string {
 }
 
 type ErrNonLinkButtonCannotHaveUrl struct {
-	Component Button
+	Component *Button
 }
 
 func (e ErrNonLinkButtonCannotHaveUrl) Error() string {
@@ -152,7 +152,7 @@ func (e ErrInvalidPropertyLength) Error() string {
 }
 
 type ErrStringSelectMenuMustHaveOptions struct {
-	Component SelectMenu
+	Component *SelectMenu
 }
 
 func (e ErrStringSelectMenuMustHaveOptions) Error() string {
@@ -167,7 +167,7 @@ func (e ErrStringSelectMenuMustHaveOptions) Error() string {
 }
 
 type ErrNonStringSelectMenuCannotHaveOptions struct {
-	Component SelectMenu
+	Component *SelectMenu
 }
 
 func (e ErrNonStringSelectMenuCannotHaveOptions) Error() string {

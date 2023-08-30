@@ -45,21 +45,21 @@ type TextInput struct {
 	Placeholder   string                          `json:"placeholder"`
 }
 
-func (t TextInput) MarshalJSON() ([]byte, error) {
+func (t *TextInput) MarshalJSON() ([]byte, error) {
 	type Alias TextInput
 
 	var inner Alias
-	inner = Alias(t)
+	inner = Alias(*t)
 	inner.TextInputType = component_type.TextInput
 
 	return json.Marshal(inner)
 }
 
-func (t TextInput) Type() component_type.ComponentType {
+func (t *TextInput) Type() component_type.ComponentType {
 	return component_type.TextInput
 }
 
-func (t TextInput) Verify() error {
+func (t *TextInput) Verify() error {
 	if t.CustomId == "" {
 		return ErrComponentMustHaveCustomId{t}
 	}

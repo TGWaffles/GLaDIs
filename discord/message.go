@@ -1,6 +1,8 @@
 package discord
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/tgwaffles/gladis/discord/channel_type"
 	"github.com/tgwaffles/gladis/discord/message_activity_type"
 	"github.com/tgwaffles/gladis/discord/message_type"
@@ -38,6 +40,64 @@ type Message struct {
 	StickerItems         []StickerItem            `json:"sticker_items,omitempty"`
 	Position             *int                     `json:"position,omitempty"`
 	RoleSubscriptionData *RoleSubscriptionData    `json:"role_subscription_data,omitempty"`
+}
+
+func (m *Message) UnmarshalJSON(data []byte) error {
+	type Alias Message
+
+	var inner Alias
+
+	dataMap := make(map[string]json.RawMessage)
+	err := json.Unmarshal(data, &dataMap)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling message into map: %w", err)
+	}
+
+	componentsListIface := dataMap["components"]
+	if componentsListIface == nil {
+		err = json.Unmarshal(data, &inner)
+		if err != nil {
+			return fmt.Errorf("error unmarshalling message: %w", err)
+		}
+		*m = Message(inner)
+		return nil
+	}
+	var componentsList []json.RawMessage
+	err = json.Unmarshal(componentsListIface, &componentsList)
+	if len(componentsList) == 0 {
+		err = json.Unmarshal(data, &inner)
+		if err != nil {
+			return fmt.Errorf("error unmarshalling message: %w", err)
+		}
+		*m = Message(inner)
+		return nil
+	}
+
+	components := make([]MessageComponent, len(componentsList))
+	for i, component := range componentsList {
+		var messageComponent MessageComponentWrapper
+		err = json.Unmarshal(component, &messageComponent)
+		if err != nil {
+			return err
+		}
+		components[i] = messageComponent.component
+	}
+
+	delete(dataMap, "components")
+	newData, err := json.Marshal(dataMap)
+	if err != nil {
+		return fmt.Errorf("error marshalling message without components: %w", err)
+	}
+
+	err = json.Unmarshal(newData, &inner)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling message without components: %w", err)
+	}
+	*m = Message(inner)
+
+	m.Components = components
+
+	return nil
 }
 
 type MessageReference struct {
