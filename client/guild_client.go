@@ -3,6 +3,8 @@ package client
 import (
 	"github.com/tgwaffles/gladis/discord"
 	"net/http"
+	"net/url"
+	"strconv"
 )
 
 type GuildClient struct {
@@ -61,6 +63,45 @@ func (guildClient *GuildClient) GetActiveThreads() (ActiveThreadsResponse, error
 	}
 
 	return response, nil
+}
+
+type ListMembersRequest struct {
+	// The last member fetched
+	After *discord.Snowflake
+	// Max members to fetch in one request
+	Limit *int
+}
+
+func (guildClient *GuildClient) ListMembers(request ListMembersRequest) ([]discord.Member, error) {
+	members := make([]discord.Member, 0)
+
+	query := make(url.Values)
+	if request.After != nil {
+		query.Add("after", request.After.String())
+	}
+	if request.Limit != nil {
+		query.Add("limit", strconv.Itoa(*request.Limit))
+	}
+	endpoint := "/members"
+	encodedQuery := query.Encode()
+	if len(encodedQuery) > 0 {
+		endpoint += "?" + encodedQuery
+	}
+
+	req := DiscordRequest{
+		ExpectedStatus: 200,
+		Method:         "GET",
+		Endpoint:       endpoint,
+		Body:           nil,
+		UnmarshalTo:    &members,
+	}
+
+	_, err := guildClient.MakeRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return members, nil
 }
 
 func (guildClient *GuildClient) GetChannels() ([]discord.Channel, error) {
