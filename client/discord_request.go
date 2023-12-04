@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	DiscordApiURL = "https://discord.com/api"
+	DiscordApiURL = "https://discord.com/api/v10"
 )
 
 type DiscordRequest struct {
