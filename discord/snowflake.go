@@ -21,8 +21,8 @@ func GetSnowflake(id interface{}) (Snowflake, error) {
 	}
 }
 
-func (i *Snowflake) MarshalJSON() ([]byte, error) {
-	return json.Marshal(strconv.FormatUint(uint64(*i), 10))
+func (i Snowflake) MarshalJSON() ([]byte, error) {
+	return json.Marshal(strconv.FormatUint(uint64(i), 10))
 }
 
 func (i *Snowflake) UnmarshalJSON(b []byte) error {

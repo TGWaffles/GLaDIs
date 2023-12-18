@@ -26,7 +26,7 @@ type RoleTags struct {
 	GuildConnections     bool `json:"guild_connections,omitempty"`
 }
 
-func (tags *RoleTags) MarshalJSON() ([]byte, error) {
+func (tags RoleTags) MarshalJSON() ([]byte, error) {
 	raw := map[string]interface{}{}
 
 	if tags.BotId != nil {

@@ -16,11 +16,11 @@ type Button struct {
 	ButtonType component_type.ComponentType `json:"type"`
 }
 
-func (button *Button) MarshalJSON() ([]byte, error) {
+func (button Button) MarshalJSON() ([]byte, error) {
 	type Alias Button
 
 	var inner Alias
-	inner = Alias(*button)
+	inner = Alias(button)
 	inner.ButtonType = component_type.Button
 
 	return json.Marshal(inner)

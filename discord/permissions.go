@@ -7,8 +7,8 @@ import (
 
 type Permissions uint64
 
-func (i *Permissions) MarshalJSON() ([]byte, error) {
-	return json.Marshal(strconv.FormatUint(uint64(*i), 10))
+func (i Permissions) MarshalJSON() ([]byte, error) {
+	return json.Marshal(strconv.FormatUint(uint64(i), 10))
 }
 
 func (i *Permissions) UnmarshalJSON(b []byte) error {

@@ -13,7 +13,7 @@ type MessageComponentWrapper struct {
 	component MessageComponent
 }
 
-func (m *MessageComponentWrapper) MarshalJSON() ([]byte, error) {
+func (m MessageComponentWrapper) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m.component)
 }
 
@@ -104,11 +104,11 @@ type ActionRow struct {
 	Components []MessageComponent           `json:"components"`
 }
 
-func (a *ActionRow) MarshalJSON() ([]byte, error) {
+func (a ActionRow) MarshalJSON() ([]byte, error) {
 	type Alias ActionRow
 
 	var inner Alias
-	inner = Alias(*a)
+	inner = Alias(a)
 	inner.RowType = component_type.ActionRow
 
 	return json.Marshal(inner)
