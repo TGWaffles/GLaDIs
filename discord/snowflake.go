@@ -44,3 +44,12 @@ func (i *Snowflake) UnmarshalJSON(b []byte) error {
 func (i *Snowflake) String() string {
 	return strconv.FormatUint(uint64(*i), 10)
 }
+
+func (i *Snowflake) UnmarshalText(text []byte) error {
+	value, err := strconv.ParseInt(string(text), 10, 64)
+	if err != nil {
+		return err
+	}
+	*i = Snowflake(value)
+	return nil
+}
