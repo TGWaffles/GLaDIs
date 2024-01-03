@@ -180,15 +180,15 @@ func (interaction *Interaction) DeleteResponse() error {
 }
 
 func (interaction *Interaction) DeferResponse(isEphemeral bool) error {
-	var flags *int
+	var flags int
 	if isEphemeral {
-		*flags = 64
+		flags = 64
 	}
 
 	response := InteractionResponse{
 		Type: interaction_callback_type.DeferredChannelMessageWithSource,
 		Data: &MessageCallbackData{
-			Flags: flags,
+			Flags: &flags,
 		},
 	}
 
