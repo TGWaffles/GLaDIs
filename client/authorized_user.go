@@ -1,9 +1,6 @@
 package client
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/tgwaffles/gladis/client/errors"
 	"github.com/tgwaffles/gladis/discord"
 	"github.com/tgwaffles/gladis/discord/oauth_scopes"
 	"net/http"
@@ -36,44 +33,14 @@ func (authedUser *AuthorizedUser) MakeTokenRequest(discordRequest DiscordRequest
 
 func (authedUser *AuthorizedUser) MakeRequest(discordRequest DiscordRequest) (response *http.Response, err error) {
 	discordRequest.ValidateEndpoint()
-	request, err := http.NewRequest(discordRequest.Method, discordRequest.GetUrl(), discordRequest.getBodyAsReader())
-	if err != nil {
-		return nil, fmt.Errorf("error creating HTTP request: %w", err)
-	}
 
 	if !discordRequest.DisableAuth {
-		request.Header.Set("Authorization", "Bearer "+authedUser.AccessToken)
+		discordRequest.AdditionalHeaders["Authorization"] = "Bearer " + authedUser.AccessToken
 	}
 
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("User-Agent", getUserAgent())
-	request.Header.Set("Accept", "application/json")
+	discordRequest.AdditionalHeaders["Content-Type"] = "application/json"
 
-	for key, value := range discordRequest.AdditionalHeaders {
-		request.Header.Set(key, value)
-	}
-
-	response, err = authedUser.Client.Do(request)
-	if err != nil {
-		return nil, fmt.Errorf("error sending HTTP request: %w", err)
-	}
-
-	if !discordRequest.DisableStatusCheck && response.StatusCode != discordRequest.ExpectedStatus {
-		return nil, errors.StatusError{
-			Code:     errors.StatusErrorCode(response.StatusCode),
-			Response: response,
-		}
-	}
-
-	if discordRequest.UnmarshalTo != nil {
-		err = json.NewDecoder(response.Body).Decode(discordRequest.UnmarshalTo)
-		if err != nil {
-			return nil, fmt.Errorf("error unmarshalling response: %w", err)
-		}
-		return nil, nil
-	}
-
-	return response, nil
+	return authedUser.OAuthClient.MakeRequest(discordRequest)
 }
 
 func (authedUser *AuthorizedUser) RefreshTokens() error {

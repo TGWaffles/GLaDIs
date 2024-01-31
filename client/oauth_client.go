@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/tgwaffles/gladis/client/errors"
 	"github.com/tgwaffles/gladis/discord/oauth_scopes"
@@ -8,15 +9,13 @@ import (
 	"net/url"
 )
 
-const DISCORD_AUTHORIZATION_URL = "https://discordapp.com/api/oauth2/authorize"
-const DISCORD_TOKEN_URL = "https://discordapp.com/api/oauth2/token"
+const DiscordAuthorizationUrl = "https://discordapp.com/api/oauth2/authorize"
 
 type OAuthClient struct {
-	clientId     string
-	clientSecret string
-	client       *http.Client
+	ClientId     string
+	ClientSecret string
+	Client       *http.Client
 	redirectUri  string
-	Scopes       []oauth_scopes.OAuthScope
 }
 
 func (oauthClient *OAuthClient) MakeRequest(discordRequest DiscordRequest) (response *http.Response, err error) {
@@ -36,7 +35,7 @@ func (oauthClient *OAuthClient) MakeRequest(discordRequest DiscordRequest) (resp
 		request.Header.Set(key, value)
 	}
 
-	response, err = oauthClient.client.Do(request)
+	response, err = oauthClient.Client.Do(request)
 	if err != nil {
 		return nil, fmt.Errorf("error sending HTTP request: %w", err)
 	}
@@ -48,28 +47,35 @@ func (oauthClient *OAuthClient) MakeRequest(discordRequest DiscordRequest) (resp
 		}
 	}
 
+	if discordRequest.UnmarshalTo != nil {
+		err = json.NewDecoder(response.Body).Decode(discordRequest.UnmarshalTo)
+		if err != nil {
+			return nil, fmt.Errorf("error unmarshalling response: %w", err)
+		}
+		return nil, nil
+	}
+
 	return response, nil
 }
 
-func NewOAuthClient(clientId string, clientSecret string, redirectUri string, scopes []oauth_scopes.OAuthScope) *OAuthClient {
+func NewOAuthClient(clientId string, clientSecret string, redirectUri string) *OAuthClient {
 	return &OAuthClient{
-		clientId:     clientId,
-		clientSecret: clientSecret,
-		client:       http.DefaultClient,
+		ClientId:     clientId,
+		ClientSecret: clientSecret,
+		Client:       http.DefaultClient,
 		redirectUri:  redirectUri,
-		Scopes:       scopes,
 	}
 }
 
-func (oauthClient *OAuthClient) BuildAuthorizationURL(state string) string {
+func (oauthClient *OAuthClient) BuildAuthorizationURL(scopes []oauth_scopes.OAuthScope, state string) string {
 	params := url.Values{}
 
-	params.Add("client_id", oauthClient.clientId)
+	params.Add("client_id", oauthClient.ClientId)
 	params.Add("response_type", "code")
 	params.Add("redirect_uri", oauthClient.redirectUri)
 	params.Add("state", state)
 
-	return DISCORD_AUTHORIZATION_URL + "?" + params.Encode() + "&scope=" + oauth_scopes.FormatScopesToParamString(oauthClient.Scopes)
+	return DiscordAuthorizationUrl + "?" + params.Encode() + "&scope=" + oauth_scopes.FormatScopesToParamString(scopes)
 }
 
 func (oauthClient *OAuthClient) AuthorizeUserFromCode(code string) (*AuthorizedUser, error) {
