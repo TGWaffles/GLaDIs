@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/tgwaffles/gladis/client/errors"
 	"github.com/tgwaffles/gladis/discord"
+	"github.com/tgwaffles/gladis/discord/oauth_scopes"
 	"net/http"
 )
 
@@ -12,12 +13,12 @@ type AuthorizedUser struct {
 	RefreshToken string
 	AccessToken  string
 	ExpiresIn    int
-	Scopes       []discord.OAuthScope
+	Scopes       []oauth_scopes.OAuthScope
 	Client       *http.Client
 	OAuthClient  *OAuthClient
 }
 
-func NewAuthorizedUser(refreshToken string, accessToken string, expiresIn int, scopes []discord.OAuthScope) *AuthorizedUser {
+func NewAuthorizedUser(refreshToken string, accessToken string, expiresIn int, scopes []oauth_scopes.OAuthScope) *AuthorizedUser {
 	return &AuthorizedUser{
 		RefreshToken: refreshToken,
 		AccessToken:  accessToken,

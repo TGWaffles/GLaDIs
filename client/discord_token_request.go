@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/tgwaffles/gladis/discord"
+	"github.com/tgwaffles/gladis/discord/oauth_scopes"
 	"net/url"
 )
 
@@ -77,6 +77,6 @@ func (response *TokenResponse) ToAuthorizedUser() *AuthorizedUser {
 		RefreshToken: response.RefreshToken,
 		AccessToken:  response.AccessToken,
 		ExpiresIn:    response.ExpiresIn,
-		Scopes:       discord.ParseParamStringToScopes(response.Scope),
+		Scopes:       oauth_scopes.ParseParamStringToScopes(response.Scope),
 	}
 }
