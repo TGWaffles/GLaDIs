@@ -27,8 +27,7 @@
 
 ## About The Project
 
-I've had a need for quickly creating secrets for various use cases, for example, creating a secret for a new API key or a JWT secret. I've always used online tools or NodeJS, but I wanted a simple command line tool that I could use to create secrets for any use case.
-
+A project built to handle Discord interactions on AWS lambda, for Go. This project is built to be used with the [Discord Slash Commands](https://discord.com/developers/docs/interactions/slash-commands) feature, and is built to be used with the [Discord API](https://discord.com/developers/docs/intro) in general.
 
 ### Built With
 
@@ -52,7 +51,7 @@ See the [releases](https://github.com/TGWaffles/GLaDIs/releases/) page for all r
 
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Contributions are what make the open source community such an amazing place to learn, be inspired, and create. Any contributions you make are **greatly appreciated**.
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
