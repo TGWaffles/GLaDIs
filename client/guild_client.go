@@ -1,6 +1,8 @@
 package client
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/tgwaffles/gladis/discord"
 	"net/http"
 	"net/url"
@@ -10,6 +12,14 @@ import (
 type GuildClient struct {
 	GuildId discord.Snowflake
 	Bot     *BotClient
+}
+
+type JoinUserToGuildRequest struct {
+	AccessToken string              `json:"access_token"`
+	Nick        string              `json:"nick,omitempty"`
+	Roles       []discord.Snowflake `json:"roles,omitempty"`
+	Mute        bool                `json:"mute,omitempty"`
+	Deaf        bool                `json:"deaf,omitempty"`
 }
 
 func (guildClient *GuildClient) MakeRequest(discordRequest DiscordRequest) (response *http.Response, err error) {
@@ -119,4 +129,34 @@ func (guildClient *GuildClient) GetChannels() ([]discord.Channel, error) {
 	}
 
 	return channels, nil
+}
+
+func (guildClient *GuildClient) JoinUserToGuild(authedUser *AuthorizedUser, userId discord.Snowflake, guildId discord.Snowflake) (err error) {
+	requestBody := &JoinUserToGuildRequest{
+		AccessToken: authedUser.AccessToken,
+	}
+
+	data, err := json.Marshal(requestBody)
+
+	if err != nil {
+		return err
+	}
+
+	var response *http.Response
+	response, err = guildClient.Bot.MakeRequest(DiscordRequest{
+		Method:             "PUT",
+		Endpoint:           "/guilds/" + guildId.String() + "/members/" + userId.String(),
+		Body:               data,
+		DisableStatusCheck: true,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode == 204 {
+		return fmt.Errorf("user already exists in guild")
+	}
+
+	return nil
 }
