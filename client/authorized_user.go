@@ -15,20 +15,15 @@ type AuthorizedUser struct {
 	OAuthClient  *OAuthClient
 }
 
-func NewAuthorizedUser(refreshToken string, accessToken string, expiresIn int, scopes []oauth_scopes.OAuthScope) *AuthorizedUser {
+func NewAuthorizedUser(oauthClient *OAuthClient, refreshToken string, accessToken string, expiresIn int, scopes []oauth_scopes.OAuthScope) *AuthorizedUser {
 	return &AuthorizedUser{
 		RefreshToken: refreshToken,
 		AccessToken:  accessToken,
 		ExpiresIn:    expiresIn,
 		Scopes:       scopes,
 		Client:       http.DefaultClient,
+		OAuthClient:  oauthClient,
 	}
-}
-
-func (authedUser *AuthorizedUser) MakeTokenRequest(discordRequest DiscordRequest) (response *http.Response, err error) {
-	discordRequest.ValidateEndpoint()
-
-	return authedUser.OAuthClient.MakeRequest(discordRequest)
 }
 
 func (authedUser *AuthorizedUser) MakeRequest(discordRequest DiscordRequest) (response *http.Response, err error) {
@@ -45,20 +40,7 @@ func (authedUser *AuthorizedUser) MakeRequest(discordRequest DiscordRequest) (re
 
 func (authedUser *AuthorizedUser) RefreshTokens() error {
 
-	requestBody := &TokenRequest{
-		GrantType:    GrantTypeRefreshToken,
-		RefreshToken: authedUser.RefreshToken,
-	}
-
-	var tokenResponse TokenResponse
-
-	_, err := authedUser.MakeTokenRequest(DiscordRequest{
-		ExpectedStatus: 200,
-		Method:         "POST",
-		Endpoint:       "/oauth2/token",
-		Body:           []byte(requestBody.ToString()),
-		UnmarshalTo:    tokenResponse,
-	})
+	tokenResponse, err := authedUser.OAuthClient.RefreshTokensForUser(authedUser.RefreshToken)
 
 	if err != nil {
 		return err
@@ -72,18 +54,8 @@ func (authedUser *AuthorizedUser) RefreshTokens() error {
 }
 
 func (authedUser *AuthorizedUser) RevokeTokens() error {
-	requestBody := &RevokeTokenRequest{
-		Token:         authedUser.AccessToken,
-		TokenTypeHint: "access_token",
-	}
+	err := authedUser.OAuthClient.RevokeTokensForUser(authedUser.AccessToken)
 
-	_, err := authedUser.MakeTokenRequest(DiscordRequest{
-		ExpectedStatus: 204,
-		Method:         "POST",
-		Endpoint:       "/oauth2/token/revoke",
-		Body:           []byte(requestBody.ToString()),
-		UnmarshalTo:    nil,
-	})
 	if err != nil {
 		return err
 	}

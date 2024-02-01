@@ -17,11 +17,15 @@ type TokenRequest struct {
 	Code         string         `json:"code,omitempty"`
 	RedirectUri  string         `json:"redirect_uri,omitempty"`
 	RefreshToken string         `json:"refresh_token,omitempty"`
+	ClientId     string         `json:"client_id,omitempty"`
+	ClientSecret string         `json:"client_secret,omitempty"`
 }
 
 type RevokeTokenRequest struct {
 	Token         string `json:"token"`
 	TokenTypeHint string `json:"token_type_hint"`
+	ClientId      string `json:"client_id"`
+	ClientSecret  string `json:"client_secret"`
 }
 
 func (r *RevokeTokenRequest) ToValues() url.Values {
@@ -32,6 +36,9 @@ func (r *RevokeTokenRequest) ToValues() url.Values {
 	if r.TokenTypeHint != "" {
 		formValues.Add("token_type_hint", r.TokenTypeHint)
 	}
+
+	formValues.Add("client_id", r.ClientId)
+	formValues.Add("client_secret", r.ClientSecret)
 
 	return formValues
 }
@@ -65,6 +72,9 @@ func (t *TokenRequest) ToValues() url.Values {
 		formValues.Add("refresh_token", t.RefreshToken)
 	}
 
+	formValues.Add("client_id", t.ClientId)
+	formValues.Add("client_secret", t.ClientSecret)
+
 	return formValues
 }
 
@@ -72,11 +82,6 @@ func (t *TokenRequest) ToString() string {
 	return t.ToValues().Encode()
 }
 
-func (response *TokenResponse) ToAuthorizedUser() *AuthorizedUser {
-	return &AuthorizedUser{
-		RefreshToken: response.RefreshToken,
-		AccessToken:  response.AccessToken,
-		ExpiresIn:    response.ExpiresIn,
-		Scopes:       oauth_scopes.ParseParamStringToScopes(response.Scope),
-	}
+func (response *TokenResponse) ToAuthorizedUser(client *OAuthClient) *AuthorizedUser {
+	return NewAuthorizedUser(client, response.AccessToken, response.RefreshToken, response.ExpiresIn, oauth_scopes.ParseParamStringToScopes(response.Scope))
 }

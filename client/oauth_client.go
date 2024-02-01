@@ -80,9 +80,11 @@ func (oauthClient *OAuthClient) BuildAuthorizationURL(scopes []oauth_scopes.OAut
 
 func (oauthClient *OAuthClient) AuthorizeUserFromCode(code string) (*AuthorizedUser, error) {
 	requestBody := &TokenRequest{
-		GrantType:   GrantTypeAuthorizationCode,
-		Code:        code,
-		RedirectUri: oauthClient.redirectUri,
+		GrantType:    GrantTypeAuthorizationCode,
+		Code:         code,
+		RedirectUri:  oauthClient.redirectUri,
+		ClientId:     oauthClient.ClientId,
+		ClientSecret: oauthClient.ClientSecret,
 	}
 
 	var tokenResponse TokenResponse
@@ -98,5 +100,50 @@ func (oauthClient *OAuthClient) AuthorizeUserFromCode(code string) (*AuthorizedU
 		return nil, err
 	}
 
-	return tokenResponse.ToAuthorizedUser(), nil
+	return tokenResponse.ToAuthorizedUser(oauthClient), nil
+}
+
+func (oauthClient *OAuthClient) RefreshTokensForUser(refreshToken string) (tokenResponse *TokenResponse, err error) {
+	requestBody := &TokenRequest{
+		GrantType:    GrantTypeRefreshToken,
+		RefreshToken: refreshToken,
+		ClientId:     oauthClient.ClientId,
+		ClientSecret: oauthClient.ClientSecret,
+	}
+
+	_, err = oauthClient.MakeRequest(DiscordRequest{
+		ExpectedStatus: 200,
+		Method:         "POST",
+		Endpoint:       "/oauth2/token",
+		Body:           []byte(requestBody.ToString()),
+		UnmarshalTo:    tokenResponse,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return tokenResponse, nil
+}
+
+func (oauthClient *OAuthClient) RevokeTokensForUser(accessToken string) (err error) {
+	requestBody := &RevokeTokenRequest{
+		Token:         accessToken,
+		TokenTypeHint: "access_token",
+		ClientId:      oauthClient.ClientId,
+		ClientSecret:  oauthClient.ClientSecret,
+	}
+
+	_, err = oauthClient.MakeRequest(DiscordRequest{
+		ExpectedStatus: 204,
+		Method:         "POST",
+		Endpoint:       "/oauth2/token/revoke",
+		Body:           []byte(requestBody.ToString()),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
