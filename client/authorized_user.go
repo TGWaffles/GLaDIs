@@ -30,6 +30,10 @@ func (authedUser *AuthorizedUser) MakeRequest(discordRequest DiscordRequest) (re
 	discordRequest.ValidateEndpoint()
 
 	if !discordRequest.DisableAuth {
+		if discordRequest.AdditionalHeaders == nil {
+			discordRequest.AdditionalHeaders = map[string]string{}
+		}
+
 		discordRequest.AdditionalHeaders["Authorization"] = "Bearer " + authedUser.AccessToken
 	}
 
@@ -80,14 +84,15 @@ func (authedUser *AuthorizedUser) FetchUser() (*discord.User, error) {
 }
 
 func (authedUser *AuthorizedUser) FetchGuilds() ([]discord.Guild, error) {
-	var guilds []discord.Guild
+	guilds := make([]discord.Guild, 0)
 
 	_, err := authedUser.MakeRequest(DiscordRequest{
 		Method:         "GET",
 		Endpoint:       "/users/@me/guilds",
 		ExpectedStatus: 200,
-		UnmarshalTo:    guilds,
+		UnmarshalTo:    &guilds,
 	})
+
 	if err != nil {
 		return nil, err
 	}

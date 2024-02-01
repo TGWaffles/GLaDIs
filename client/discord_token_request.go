@@ -83,5 +83,5 @@ func (t *TokenRequest) ToString() string {
 }
 
 func (response *TokenResponse) ToAuthorizedUser(client *OAuthClient) *AuthorizedUser {
-	return NewAuthorizedUser(client, response.AccessToken, response.RefreshToken, response.ExpiresIn, oauth_scopes.ParseParamStringToScopes(response.Scope))
+	return NewAuthorizedUser(client, response.RefreshToken, response.AccessToken, response.ExpiresIn, oauth_scopes.ParseParamStringToScopes(response.Scope))
 }

@@ -111,13 +111,17 @@ func (oauthClient *OAuthClient) RefreshTokensForUser(refreshToken string) (token
 		ClientSecret: oauthClient.ClientSecret,
 	}
 
-	_, err = oauthClient.MakeRequest(DiscordRequest{
-		ExpectedStatus: 200,
+	fmt.Println(requestBody.ToString())
+
+	request := DiscordRequest{
 		Method:         "POST",
 		Endpoint:       "/oauth2/token",
 		Body:           []byte(requestBody.ToString()),
-		UnmarshalTo:    tokenResponse,
-	})
+		ExpectedStatus: 200,
+		UnmarshalTo:    &tokenResponse,
+	}
+
+	_, err = oauthClient.MakeRequest(request)
 
 	if err != nil {
 		return nil, err
@@ -135,7 +139,7 @@ func (oauthClient *OAuthClient) RevokeTokensForUser(accessToken string) (err err
 	}
 
 	_, err = oauthClient.MakeRequest(DiscordRequest{
-		ExpectedStatus: 204,
+		ExpectedStatus: 200,
 		Method:         "POST",
 		Endpoint:       "/oauth2/token/revoke",
 		Body:           []byte(requestBody.ToString()),
