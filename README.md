@@ -8,7 +8,7 @@
 <h3 align="center">GLaDIs</h3>
 
   <p align="center">
-    Discord interactions support on AWS lambda, for Golang.
+    Golang Lambda Discord Interactions
   </p>
 </p>
 
@@ -26,8 +26,7 @@
 <!-- ABOUT THE PROJECT -->
 
 ## About The Project
-
-A project built to handle Discord interactions on AWS lambda, for Go. This project is built to be used with the [Discord Slash Commands](https://discord.com/developers/docs/interactions/slash-commands) feature, and is built to be used with the [Discord API](https://discord.com/developers/docs/intro) in general.
+Discord interactions support on AWS lambda, for Golang.
 
 ### Built With
 
