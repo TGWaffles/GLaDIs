@@ -36,7 +36,11 @@ const (
 
 func FormatScopesToParamString(scopes []OAuthScope) string {
 	scopeString := ""
-	for _, scope := range scopes {
+	for i, scope := range scopes {
+		if i == len(scopes) - 1 {
+			scopeString += string(scope)
+			continue
+		}
 		scopeString += string(scope) + "%20"
 	}
 	return scopeString
