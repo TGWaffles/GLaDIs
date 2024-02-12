@@ -3,10 +3,11 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tgwaffles/gladis/client/errors"
-	"github.com/tgwaffles/gladis/discord/oauth_scopes"
 	"net/http"
 	"net/url"
+
+	"github.com/tgwaffles/gladis/client/errors"
+	"github.com/tgwaffles/gladis/discord/oauth_scopes"
 )
 
 const DiscordAuthorizationUrl = "https://discordapp.com/api/oauth2/authorize"
@@ -68,14 +69,12 @@ func NewOAuthClient(clientId string, clientSecret string, redirectUri string) *O
 }
 
 func (oauthClient *OAuthClient) BuildAuthorizationURL(scopes []oauth_scopes.OAuthScope, state string) string {
-	params := url.Values{}
-
-	params.Add("client_id", oauthClient.ClientId)
-	params.Add("response_type", "code")
-	params.Add("redirect_uri", oauthClient.redirectUri)
-	params.Add("state", state)
-
-	return DiscordAuthorizationUrl + "?" + params.Encode() + "&scope=" + oauth_scopes.FormatScopesToParamString(scopes)
+	return DiscordAuthorizationUrl + "?" + 
+		"client_id=" + oauthClient.ClientId + "&" +
+		"redirect_uri=" + url.QueryEscape(oauthClient.redirectUri) + "&" +
+		"response_type=code&" +
+		"scope=" + oauth_scopes.FormatScopesToParamString(scopes) + "&" +
+		"state=" + url.QueryEscape(state)
 }
 
 func (oauthClient *OAuthClient) AuthorizeUserFromCode(code string) (*AuthorizedUser, error) {
