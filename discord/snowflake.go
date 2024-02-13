@@ -3,6 +3,7 @@ package discord
 import (
 	"encoding/json"
 	"strconv"
+	"time"
 )
 
 type Snowflake uint64
@@ -19,6 +20,10 @@ func GetSnowflake(id interface{}) (Snowflake, error) {
 	default:
 		return Snowflake(id.(uint64)), nil
 	}
+}
+
+func SnowflakeFromTime(t time.Time) Snowflake {
+	return Snowflake((t.UnixMilli() - 1420070400000) << 22)
 }
 
 func (i Snowflake) MarshalJSON() ([]byte, error) {
