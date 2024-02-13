@@ -2,6 +2,7 @@ package discord
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -81,11 +82,20 @@ func (hook *Webhook) GetUrl() string {
 }
 
 func (hook *Webhook) Send(req WebhookRequest) (returnedMessage *Message, err error) {
+	return hook.SendWithContext(nil, req)
+}
+
+func (hook *Webhook) SendWithContext(ctx context.Context, req WebhookRequest) (returnedMessage *Message, err error) {
 	data, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling data to JSON: %w", err)
 	}
-	request, err := http.NewRequest("POST", hook.GetUrl(), bytes.NewReader(data))
+	var request *http.Request
+	if ctx != nil {
+		request, err = http.NewRequestWithContext(ctx, "POST", hook.GetUrl(), bytes.NewReader(data))
+	} else {
+		request, err = http.NewRequest("POST", hook.GetUrl(), bytes.NewReader(data))
+	}
 	if err != nil {
 		return nil, fmt.Errorf("error creating HTTP request: %w", err)
 	}
@@ -126,6 +136,10 @@ type WebhookGetMessageRequest struct {
 }
 
 func (hook *Webhook) GetMessage(req WebhookGetMessageRequest) (message *Message, err error) {
+	return hook.GetMessageWithContext(nil, req)
+}
+
+func (hook *Webhook) GetMessageWithContext(ctx context.Context, req WebhookGetMessageRequest) (message *Message, err error) {
 	var body io.Reader
 	if req.ThreadId != nil {
 		data, err := json.Marshal(req)
@@ -134,8 +148,12 @@ func (hook *Webhook) GetMessage(req WebhookGetMessageRequest) (message *Message,
 		}
 		body = bytes.NewReader(data)
 	}
-
-	request, err := http.NewRequest("GET", hook.GetUrl()+fmt.Sprintf("/messages/%s", req.MessageId), body)
+	var request *http.Request
+	if ctx != nil {
+		request, err = http.NewRequestWithContext(ctx, "GET", hook.GetUrl()+fmt.Sprintf("/messages/%s", req.MessageId), body)
+	} else {
+		request, err = http.NewRequest("GET", hook.GetUrl()+fmt.Sprintf("/messages/%s", req.MessageId), body)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("error creating HTTP request: %w", err)
 	}
@@ -160,6 +178,10 @@ func (hook *Webhook) GetMessage(req WebhookGetMessageRequest) (message *Message,
 }
 
 func (hook *Webhook) EditMessage(messageId string, data ResponseEditData) error {
+	return hook.EditMessageWithContext(nil, messageId, data)
+}
+
+func (hook *Webhook) EditMessageWithContext(ctx context.Context, messageId string, data ResponseEditData) error {
 	err := data.Verify()
 	if err != nil {
 		return fmt.Errorf("error verifying edit data: %w", err)
@@ -169,8 +191,12 @@ func (hook *Webhook) EditMessage(messageId string, data ResponseEditData) error 
 	if err != nil {
 		return fmt.Errorf("error marshaling data to JSON: %w", err)
 	}
-
-	request, err := http.NewRequest("PATCH", hook.GetUrl()+fmt.Sprintf("/messages/%s", messageId), bytes.NewReader(body))
+	var request *http.Request
+	if ctx != nil {
+		request, err = http.NewRequestWithContext(ctx, "PATCH", hook.GetUrl()+fmt.Sprintf("/messages/%s", messageId), bytes.NewReader(body))
+	} else {
+		request, err = http.NewRequest("PATCH", hook.GetUrl()+fmt.Sprintf("/messages/%s", messageId), bytes.NewReader(body))
+	}
 	if err != nil {
 		return fmt.Errorf("error creating HTTP request: %w", err)
 	}
@@ -199,7 +225,16 @@ func (hook *Webhook) EditMessage(messageId string, data ResponseEditData) error 
 }
 
 func (hook *Webhook) DeleteMessage(messageId string) error {
-	request, err := http.NewRequest("DELETE", hook.GetUrl()+fmt.Sprintf("/messages/%s", messageId), nil)
+	return hook.DeleteMessageWithContext(nil, messageId)
+}
+
+func (hook *Webhook) DeleteMessageWithContext(ctx context.Context, messageId string) (err error) {
+	var request *http.Request
+	if ctx != nil {
+		request, err = http.NewRequestWithContext(ctx, "DELETE", hook.GetUrl()+fmt.Sprintf("/messages/%s", messageId), nil)
+	} else {
+		request, err = http.NewRequest("DELETE", hook.GetUrl()+fmt.Sprintf("/messages/%s", messageId), nil)
+	}
 	if err != nil {
 		return fmt.Errorf("error creating HTTP request: %w", err)
 	}
