@@ -2,6 +2,7 @@ package discord
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/tgwaffles/gladis/discord/interaction_callback_type"
@@ -105,11 +106,20 @@ func (interaction *Interaction) IsPing() bool {
 }
 
 func (interaction *Interaction) CreateResponse(response InteractionResponse) error {
+	return interaction.CreateResponseWithContext(nil, response)
+}
+
+func (interaction *Interaction) CreateResponseWithContext(ctx context.Context, response InteractionResponse) error {
 	data, err := json.Marshal(response)
 	if err != nil {
 		return fmt.Errorf("error marshaling data to JSON: %w", err)
 	}
-	request, err := http.NewRequest("POST", fmt.Sprintf(createInteractionResponseUrl, interaction.Id, interaction.Token), bytes.NewReader(data))
+	var request *http.Request
+	if ctx != nil {
+		request, err = http.NewRequestWithContext(ctx, "POST", fmt.Sprintf(createInteractionResponseUrl, interaction.Id, interaction.Token), bytes.NewReader(data))
+	} else {
+		request, err = http.NewRequest("POST", fmt.Sprintf(createInteractionResponseUrl, interaction.Id, interaction.Token), bytes.NewReader(data))
+	}
 	if err != nil {
 		return fmt.Errorf("error creating HTTP request: %w", err)
 	}
