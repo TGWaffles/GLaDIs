@@ -10,3 +10,19 @@ type Emoji struct {
 	Animated      *bool       `json:"animated,omitempty"`
 	Available     *bool       `json:"available,omitempty"`
 }
+
+func (e Emoji) String() string {
+	emojiName := ""
+	if e.Name != nil {
+		emojiName = *e.Name
+	}
+	if e.Id == nil {
+		return emojiName
+	}
+
+	if e.Animated != nil && *e.Animated {
+		return "<a:" + emojiName + ":" + e.Id.String() + ">"
+	}
+
+	return "<:" + emojiName + ":" + e.Id.String() + ">"
+}
