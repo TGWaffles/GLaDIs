@@ -29,11 +29,15 @@ func (guildClient *GuildClient) MakeRequest(discordRequest DiscordRequest) (resp
 	return guildClient.Bot.MakeRequest(discordRequest)
 }
 
-func (guildClient *GuildClient) FetchGuild() (*discord.Guild, error) {
+func (guildClient *GuildClient) FetchGuild(withCounts bool) (*discord.Guild, error) {
 	guild := &discord.Guild{}
+	endpoint := ""
+	if withCounts {
+		endpoint = "?with_counts=true"
+	}
 	_, err := guildClient.MakeRequest(DiscordRequest{
 		Method:         "GET",
-		Endpoint:       "",
+		Endpoint:       endpoint,
 		Body:           nil,
 		ExpectedStatus: 200,
 		UnmarshalTo:    guild,
