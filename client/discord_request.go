@@ -27,8 +27,8 @@ func (discordRequest *DiscordRequest) ValidateEndpoint() {
 	if len(discordRequest.Endpoint) == 0 {
 		return
 	}
-	// Make sure the endpoint starts with a slash
-	if discordRequest.Endpoint[0] != '/' {
+	// Make sure the endpoint starts with a slash or a ?
+	if discordRequest.Endpoint[0] != '/' && discordRequest.Endpoint[0] != '?' {
 		discordRequest.Endpoint = "/" + discordRequest.Endpoint
 	}
 }
