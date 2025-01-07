@@ -8,8 +8,6 @@ import (
 	"github.com/JackHumphries9/dapper-go/discord/channel_type"
 	"github.com/JackHumphries9/dapper-go/discord/message_activity_type"
 	"github.com/JackHumphries9/dapper-go/discord/message_type"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 type Message struct {
@@ -43,49 +41,6 @@ type Message struct {
 	StickerItems         []StickerItem            `json:"sticker_items,omitempty"`
 	Position             *int                     `json:"position,omitempty"`
 	RoleSubscriptionData *RoleSubscriptionData    `json:"role_subscription_data,omitempty"`
-}
-
-func (m *Message) UnmarshalDynamoDBAttributeValue(value *dynamodb.AttributeValue) (err error) {
-	type Alias Message
-
-	var inner Alias
-
-	dataMap := value.M
-	if dataMap == nil {
-		return fmt.Errorf("error unmarshalling message into map, map empty: %v", value)
-	}
-
-	componentsListAttr := dataMap["components"]
-	if componentsListAttr == nil || len(componentsListAttr.L) == 0 {
-		err = dynamodbattribute.UnmarshalMap(dataMap, &inner)
-		if err != nil {
-			return fmt.Errorf("error unmarshalling message without components: %w", err)
-		}
-		*m = Message(inner)
-		return nil
-	}
-
-	components := make([]MessageComponent, len(componentsListAttr.L))
-	for i, component := range componentsListAttr.L {
-		var messageComponent MessageComponentWrapper
-		err = dynamodbattribute.UnmarshalMap(component.M, &messageComponent)
-		if err != nil {
-			return fmt.Errorf("error unmarshalling message component: %w", err)
-		}
-		components[i] = messageComponent.component
-	}
-
-	delete(dataMap, "components")
-
-	err = dynamodbattribute.UnmarshalMap(dataMap, &inner)
-	if err != nil {
-		return fmt.Errorf("error unmarshalling message without components: %w", err)
-	}
-	*m = Message(inner)
-
-	m.Components = components
-
-	return nil
 }
 
 func (m *Message) UnmarshalJSON(data []byte) error {

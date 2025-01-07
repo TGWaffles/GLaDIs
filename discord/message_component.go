@@ -2,12 +2,8 @@ package discord
 
 import (
 	"encoding/json"
-	"fmt"
-	"strconv"
 
 	"github.com/JackHumphries9/dapper-go/discord/component_type"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 type MessageComponentWrapper struct {
@@ -16,51 +12,6 @@ type MessageComponentWrapper struct {
 
 func (m MessageComponentWrapper) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m.component)
-}
-
-func (m *MessageComponentWrapper) UnmarshalDynamoDBAttributeValue(value *dynamodb.AttributeValue) (err error) {
-	componentMap := value.M
-	if componentMap == nil {
-		return fmt.Errorf("error unmarshalling message component into map, map empty: %v", value)
-	}
-
-	givenComponentType := componentMap["type"]
-	if givenComponentType == nil || givenComponentType.N == nil {
-		return fmt.Errorf("error unmarshalling message component into map, type empty: %v", value)
-	}
-
-	componentTypeInt, err := strconv.ParseInt(*givenComponentType.N, 10, 8)
-	if err != nil {
-		return fmt.Errorf("error unmarshalling message component into map, type not a number: %v", *givenComponentType.N)
-	}
-
-	switch component_type.ComponentType(componentTypeInt) {
-	case component_type.ActionRow:
-		var actionRow ActionRow
-		err = dynamodbattribute.UnmarshalMap(componentMap, &actionRow)
-		m.component = &actionRow
-		break
-	case component_type.Button:
-		var button Button
-		err = dynamodbattribute.UnmarshalMap(componentMap, &button)
-		m.component = &button
-		break
-	case component_type.StringSelect, component_type.UserSelect, component_type.RoleSelect, component_type.MentionableSelect, component_type.ChannelSelect:
-		var selectMenu SelectMenu
-		err = dynamodbattribute.UnmarshalMap(componentMap, &selectMenu)
-		m.component = &selectMenu
-		break
-	case component_type.TextInput:
-		var textInput TextInput
-		err = dynamodbattribute.UnmarshalMap(componentMap, &textInput)
-		m.component = &textInput
-		break
-	}
-
-	if err != nil {
-		return fmt.Errorf("error unmarshalling component to struct, %w", err)
-	}
-	return nil
 }
 
 func (m *MessageComponentWrapper) UnmarshalJSON(data []byte) error {
@@ -113,33 +64,6 @@ func (a ActionRow) MarshalJSON() ([]byte, error) {
 	inner.RowType = component_type.ActionRow
 
 	return json.Marshal(inner)
-}
-
-func (a *ActionRow) UnmarshalDynamoDBAttributeValue(value *dynamodb.AttributeValue) (err error) {
-	if a.Components == nil {
-		a.Components = make([]MessageComponent, 0)
-	}
-	dataMap := value.M
-
-	componentsListAttr := dataMap["components"]
-	if componentsListAttr == nil || len(componentsListAttr.L) == 0 {
-		return nil
-	}
-
-	components := make([]MessageComponent, len(componentsListAttr.L))
-
-	for i, component := range componentsListAttr.L {
-		var messageComponent MessageComponentWrapper
-		err = dynamodbattribute.UnmarshalMap(component.M, &messageComponent)
-		if err != nil {
-			return fmt.Errorf("error unmarshalling message component: %w", err)
-		}
-		components[i] = messageComponent.component
-	}
-
-	a.Components = components
-
-	return nil
 }
 
 func (a *ActionRow) UnmarshalJSON(data []byte) error {

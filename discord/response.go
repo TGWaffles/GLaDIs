@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/JackHumphries9/dapper-go/discord/interaction_callback_type"
-	"github.com/aws/aws-lambda-go/events"
 )
 
 type InteractionResponse struct {
@@ -13,18 +12,23 @@ type InteractionResponse struct {
 	Data InteractionCallbackData                           `json:"data,omitempty"`
 }
 
-func (ir InteractionResponse) ToAPIGatewayResponse() events.APIGatewayProxyResponse {
+type HTTPResponse struct {
+	StatusCode uint
+	Body       string
+	Headers    map[string]string
+}
+
+func (ir InteractionResponse) ToHttpResponse() HTTPResponse {
 	data, err := json.Marshal(ir)
 	if err != nil {
 		fmt.Println("Error marshalling interaction response:", err)
-		return events.APIGatewayProxyResponse{
+		return HTTPResponse{
 			StatusCode: 500,
 		}
 	}
-	return events.APIGatewayProxyResponse{
-		StatusCode:      200,
-		IsBase64Encoded: false,
-		Body:            string(data),
+	return HTTPResponse{
+		StatusCode: 200,
+		Body:       string(data),
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
