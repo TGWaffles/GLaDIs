@@ -12,7 +12,7 @@ type ModalSubmitData struct {
 	Components []MessageComponent `json:"components"`
 }
 
-func (m ModalSubmitData) UnmarshalJSON(data []byte) error {
+func (m *ModalSubmitData) UnmarshalJSON(data []byte) error {
 	dataMap := make(map[string]interface{})
 	err := json.Unmarshal(data, &dataMap)
 	if err != nil {

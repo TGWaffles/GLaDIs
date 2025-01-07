@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -108,7 +107,7 @@ func (hook *Webhook) SendWithContext(ctx context.Context, req WebhookRequest) (r
 	}
 
 	if resp.StatusCode > 300 {
-		responseBody, err := ioutil.ReadAll(resp.Body)
+		responseBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Printf("error reading HTTP response body: %v\n", err)
 			return nil, fmt.Errorf("expected status code 2xx, got %d", resp.StatusCode)
@@ -211,7 +210,7 @@ func (hook *Webhook) EditMessageWithContext(ctx context.Context, messageId strin
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
 	}(resp.Body)
-	responseBody, err := ioutil.ReadAll(resp.Body)
+	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("error reading HTTP response body: %w", err)
 	}
@@ -248,7 +247,7 @@ func (hook *Webhook) DeleteMessageWithContext(ctx context.Context, messageId str
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
 	}(resp.Body)
-	responseBody, err := ioutil.ReadAll(resp.Body)
+	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("error reading HTTP response body: %w", err)
 	}
