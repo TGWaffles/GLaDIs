@@ -4,34 +4,48 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"fmt"
-	"github.com/aws/aws-lambda-go/events"
+	"io"
+	"net/http"
 )
 
-func VerifyRequest(publicKey string, request events.APIGatewayProxyRequest) bool {
+const SignatureHeader = "x-signature-ed25519"
+const TimestampHeader = "x-signature-timestamp"
+
+func VerifySignature(publicKey string, signature string, timestamp string, body string) (bool, error) {
 	key, err := hex.DecodeString(publicKey)
 	if err != nil {
-		fmt.Println("Failed to decode public key")
-		return false
+		return false, err
 	}
 
-	signatureAsString := request.Headers["x-signature-ed25519"]
-
-	if len(signatureAsString) == 0 {
-		fmt.Println("Missing signature")
-		return false
+	if len(key) == 0 {
+		return false, fmt.Errorf("No public key provided")
 	}
 
-	signature, err := hex.DecodeString(signatureAsString)
+	sig, err := hex.DecodeString(signature)
 	if err != nil {
-		fmt.Println("Failed to decode signature")
-		return false
+		return false, err
 	}
-	timestamp := request.Headers["x-signature-timestamp"]
-	if len(timestamp) == 0 {
-		fmt.Println("Missing timestamp")
-		return false
-	}
-	body := request.Body
 
-	return ed25519.Verify(key, []byte(timestamp+body), signature)
+	if len(sig) == 0 {
+		return false, fmt.Errorf("No signature provided")
+	}
+
+	if len(timestamp) == 0 {
+		return false, fmt.Errorf("No timestamp provided")
+	}
+
+	return ed25519.Verify(key, []byte(timestamp+body), sig), nil
+}
+
+func VerifyHttpRequest(publicKey string, request *http.Request) (bool, error) {
+	var signature = request.Header.Get(SignatureHeader)
+	var timestamp = request.Header.Get(TimestampHeader)
+
+	body, err := io.ReadAll(request.Body)
+
+	if err != nil {
+		return false, err
+	}
+
+	return VerifySignature(publicKey, signature, timestamp, string(body))
 }
