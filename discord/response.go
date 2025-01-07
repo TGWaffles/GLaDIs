@@ -3,6 +3,7 @@ package discord
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/JackHumphries9/dapper-go/discord/interaction_callback_type"
 )
@@ -16,6 +17,18 @@ type HTTPResponse struct {
 	StatusCode uint
 	Body       string
 	Headers    map[string]string
+}
+
+func (res HTTPResponse) WriteResponse(w http.ResponseWriter) {
+	w.WriteHeader(int(res.StatusCode))
+
+	for key, val := range res.Headers {
+		w.Header().Add(key, val)
+	}
+
+	if res.Body != "" {
+		fmt.Fprint(w, res.Body)
+	}
 }
 
 func (ir InteractionResponse) ToHttpResponse() HTTPResponse {
