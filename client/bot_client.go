@@ -4,11 +4,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/tgwaffles/gladis/client/errors"
-	"github.com/tgwaffles/gladis/discord"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/JackHumphries9/dapper-go/client/errors"
+	"github.com/JackHumphries9/dapper-go/discord"
 )
 
 type BotClient struct {

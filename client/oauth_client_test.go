@@ -1,8 +1,9 @@
 package client
 
 import (
-	"github.com/tgwaffles/gladis/discord/oauth_scopes"
 	"testing"
+
+	"github.com/JackHumphries9/dapper-go/discord/oauth_scopes"
 )
 
 const (

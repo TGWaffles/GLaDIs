@@ -3,10 +3,11 @@ package discord
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+
+	"github.com/JackHumphries9/dapper-go/discord/component_type"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"github.com/tgwaffles/gladis/discord/component_type"
-	"strconv"
 )
 
 type MessageComponentWrapper struct {

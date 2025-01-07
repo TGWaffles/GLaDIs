@@ -3,8 +3,9 @@ package discord
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/JackHumphries9/dapper-go/discord/interaction_callback_type"
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/tgwaffles/gladis/discord/interaction_callback_type"
 )
 
 type InteractionResponse struct {

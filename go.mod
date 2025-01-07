@@ -1,6 +1,6 @@
-module github.com/tgwaffles/gladis
+module github.com/JackHumphries9/dapper-go
 
-go 1.18
+go 1.23
 
 require (
 	github.com/aws/aws-lambda-go v1.41.0

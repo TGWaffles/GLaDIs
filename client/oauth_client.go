@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/tgwaffles/gladis/client/errors"
-	"github.com/tgwaffles/gladis/discord/oauth_scopes"
+	"github.com/JackHumphries9/dapper-go/client/errors"
+	"github.com/JackHumphries9/dapper-go/discord/oauth_scopes"
 )
 
 const DiscordAuthorizationUrl = "https://discordapp.com/api/oauth2/authorize"
@@ -69,7 +69,7 @@ func NewOAuthClient(clientId string, clientSecret string, redirectUri string) *O
 }
 
 func (oauthClient *OAuthClient) BuildAuthorizationURL(scopes []oauth_scopes.OAuthScope, state string) string {
-	return DiscordAuthorizationUrl + "?" + 
+	return DiscordAuthorizationUrl + "?" +
 		"client_id=" + oauthClient.ClientId + "&" +
 		"redirect_uri=" + url.QueryEscape(oauthClient.redirectUri) + "&" +
 		"response_type=code&" +

@@ -2,8 +2,9 @@ package discord
 
 import (
 	"encoding/json"
-	"github.com/tgwaffles/gladis/discord/component_type"
-	"github.com/tgwaffles/gladis/discord/text_input_style"
+
+	"github.com/JackHumphries9/dapper-go/discord/component_type"
+	"github.com/JackHumphries9/dapper-go/discord/text_input_style"
 )
 
 type ModalSubmitData struct {

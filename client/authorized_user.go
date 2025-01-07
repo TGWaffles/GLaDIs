@@ -1,9 +1,10 @@
 package client
 
 import (
-	"github.com/tgwaffles/gladis/discord"
-	"github.com/tgwaffles/gladis/discord/oauth_scopes"
 	"net/http"
+
+	"github.com/JackHumphries9/dapper-go/discord"
+	"github.com/JackHumphries9/dapper-go/discord/oauth_scopes"
 )
 
 type AuthorizedUser struct {

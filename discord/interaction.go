@@ -5,10 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/tgwaffles/gladis/discord/interaction_callback_type"
-	"github.com/tgwaffles/gladis/discord/interaction_type"
-	"io/ioutil"
+	"io"
 	"net/http"
+
+	"github.com/JackHumphries9/dapper-go/discord/interaction_callback_type"
+	"github.com/JackHumphries9/dapper-go/discord/interaction_type"
 )
 
 type Interaction struct {
@@ -132,7 +133,7 @@ func (interaction *Interaction) CreateResponseWithContext(ctx context.Context, r
 	}
 
 	if resp.StatusCode != 204 {
-		responseBody, err := ioutil.ReadAll(resp.Body)
+		responseBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Printf("error reading HTTP response body: %v\n", err)
 			return fmt.Errorf("expected status code 204, got %d", resp.StatusCode)

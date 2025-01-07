@@ -3,12 +3,13 @@ package discord
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
+	"github.com/JackHumphries9/dapper-go/discord/channel_type"
+	"github.com/JackHumphries9/dapper-go/discord/message_activity_type"
+	"github.com/JackHumphries9/dapper-go/discord/message_type"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"github.com/tgwaffles/gladis/discord/channel_type"
-	"github.com/tgwaffles/gladis/discord/message_activity_type"
-	"github.com/tgwaffles/gladis/discord/message_type"
-	"time"
 )
 
 type Message struct {

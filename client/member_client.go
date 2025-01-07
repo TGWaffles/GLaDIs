@@ -1,8 +1,9 @@
 package client
 
 import (
-	"github.com/tgwaffles/gladis/discord"
 	"net/http"
+
+	"github.com/JackHumphries9/dapper-go/discord"
 )
 
 type MemberClient struct {

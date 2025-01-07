@@ -3,10 +3,11 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tgwaffles/gladis/discord"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/JackHumphries9/dapper-go/discord"
 )
 
 type GuildClient struct {

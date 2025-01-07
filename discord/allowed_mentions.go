@@ -1,6 +1,6 @@
 package discord
 
-import "github.com/tgwaffles/gladis/discord/allowed_mention_type"
+import "github.com/JackHumphries9/dapper-go/discord/allowed_mention_type"
 
 type AllowedMentions struct {
 	Parse       []allowed_mention_type.AllowedMentionType `json:"parse"`
