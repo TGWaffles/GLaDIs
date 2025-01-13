@@ -1,6 +1,8 @@
 package server
 
 import (
+	"crypto/ed25519"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -13,12 +15,12 @@ import (
 )
 
 type InteractionServerOptions struct {
-	PublicKey    string
+	PublicKey    ed25519.PublicKey
 	DefaultRoute string
 }
 
 var defaultConfig = InteractionServerOptions{
-	PublicKey:    "",
+	PublicKey:    ed25519.PublicKey(""),
 	DefaultRoute: "/interaction",
 }
 
@@ -27,30 +29,35 @@ type InteractionServer struct {
 }
 
 func (is *InteractionServer) handle(w http.ResponseWriter, r *http.Request) {
-	verify, err := verification.VerifyHttpRequest(is.opts.PublicKey, r)
-
-	if err != nil {
-		w.WriteHeader(500)
+	if r.Method != http.MethodPost {
+		http.Error(w, "Only POST method is supported", http.StatusMethodNotAllowed)
 		return
 	}
 
+	fmt.Printf("Interaction Recieved\n")
+	verify := verification.Verify(r, is.opts.PublicKey)
+
 	if !verify {
-		fmt.Printf("Failed verification")
-		w.WriteHeader(401)
+		fmt.Println("Failed verification")
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	rawBody, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
 
 	if err != nil {
-		fmt.Printf("Failed to read body")
+		fmt.Println("Failed to read body")
 		return
 	}
+
+	fmt.Printf("Interaction %s\n", string(rawBody))
 
 	interaction, err := discord.ParseInteraction(string(rawBody))
 
 	if err != nil {
-		fmt.Printf("Failed to parse interaction")
+		fmt.Printf("Failed to parse interaction: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -92,7 +99,7 @@ func (is *InteractionServer) registerRoute() {
 func (is *InteractionServer) Listen(port int) {
 	is.registerRoute()
 
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
@@ -102,8 +109,14 @@ func (is *InteractionServer) Listen(port int) {
 }
 
 func NewInteractionServer(publicKey string) InteractionServer {
+	key, err := hex.DecodeString(publicKey)
+
+	if err != nil {
+		panic("Invalid public key")
+	}
+
 	return NewInteractionServerWithOptions(InteractionServerOptions{
-		PublicKey:    publicKey,
+		PublicKey:    ed25519.PublicKey(key),
 		DefaultRoute: defaultConfig.DefaultRoute,
 	})
 }

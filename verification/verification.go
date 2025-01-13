@@ -1,51 +1,50 @@
 package verification
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"net/http"
 )
 
-const SignatureHeader = "x-signature-ed25519"
-const TimestampHeader = "x-signature-timestamp"
+func Verify(r *http.Request, key ed25519.PublicKey) bool {
+	var msg bytes.Buffer
 
-func VerifySignature(publicKey string, signature string, timestamp string, body string) (bool, error) {
-	key, err := hex.DecodeString(publicKey)
-	if err != nil {
-		return false, err
-	}
-
-	if len(key) == 0 {
-		return false, fmt.Errorf("No public key provided")
+	signature := r.Header.Get("X-Signature-Ed25519")
+	if signature == "" {
+		return false
 	}
 
 	sig, err := hex.DecodeString(signature)
 	if err != nil {
-		return false, err
+		return false
 	}
 
-	if len(sig) == 0 {
-		return false, fmt.Errorf("No signature provided")
+	if len(sig) != ed25519.SignatureSize || sig[63]&224 != 0 {
+		return false
 	}
 
-	if len(timestamp) == 0 {
-		return false, fmt.Errorf("No timestamp provided")
+	timestamp := r.Header.Get("X-Signature-Timestamp")
+	if timestamp == "" {
+		return false
 	}
 
-	return ed25519.Verify(key, []byte(timestamp+body), sig), nil
-}
+	msg.WriteString(timestamp)
 
-func VerifyHttpRequest(publicKey string, request *http.Request) (bool, error) {
-	var signature = request.Header.Get(SignatureHeader)
-	var timestamp = request.Header.Get(TimestampHeader)
+	defer r.Body.Close()
+	var body bytes.Buffer
 
-	body, err := io.ReadAll(request.Body)
+	// at the end of the function, copy the original body back into the request
+	defer func() {
+		r.Body = io.NopCloser(&body)
+	}()
 
+	// copy body into buffers
+	_, err = io.Copy(&msg, io.TeeReader(r.Body, &body))
 	if err != nil {
-		return false, err
+		return false
 	}
 
-	return VerifySignature(publicKey, signature, timestamp, string(body))
+	return ed25519.Verify(key, msg.Bytes(), sig)
 }
