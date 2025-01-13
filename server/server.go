@@ -3,14 +3,15 @@ package server
 import (
 	"crypto/ed25519"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/JackHumphries9/dapper-go/discord"
-	"github.com/JackHumphries9/dapper-go/discord/interaction_callback_type"
 	"github.com/JackHumphries9/dapper-go/discord/interaction_type"
+	"github.com/JackHumphries9/dapper-go/managers"
 	"github.com/JackHumphries9/dapper-go/verification"
 )
 
@@ -21,11 +22,12 @@ type InteractionServerOptions struct {
 
 var defaultConfig = InteractionServerOptions{
 	PublicKey:    ed25519.PublicKey(""),
-	DefaultRoute: "/interaction",
+	DefaultRoute: "/interactions",
 }
 
 type InteractionServer struct {
-	opts InteractionServerOptions
+	opts           InteractionServerOptions
+	commandManager managers.DapperCommandManager
 }
 
 func (is *InteractionServer) handle(w http.ResponseWriter, r *http.Request) {
@@ -66,34 +68,43 @@ func (is *InteractionServer) handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var interactionResponse discord.InteractionResponse
+
 	if interaction.Type == interaction_type.ApplicationCommand {
-		commandData := interaction.Data.(*discord.ApplicationCommandData)
-
-		if commandData.Name == "hello" {
-			response := &discord.InteractionResponse{
-				Type: interaction_callback_type.UpdateMessage,
-				Data: discord.MessageCallbackData{
-					Embeds: []discord.Embed{
-						{
-							Title: "Hello World!",
-						},
-					},
-				},
-			}
-
-			response.ToHttpResponse().WriteResponse(w)
-			return
-		}
+		interactionResponse, err = is.commandManager.RouteInteraction(interaction)
+	}
+	if interaction.Type == interaction_type.MessageComponent {
 
 	}
 
-	fmt.Printf("got / request\n")
-	io.WriteString(w, "This is my website!\n")
+	if err != nil {
+		fmt.Printf("An error occured while handling the interaction")
+
+		// TODO: Add better error handling
+		w.WriteHeader(500)
+		return
+	}
+
+	body, err := json.Marshal(interactionResponse)
+	if err != nil {
+		fmt.Printf("An error occured while responding")
+		w.WriteHeader(500)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write(body)
+
+	return
 }
 
 func (is *InteractionServer) registerRoute() {
 	http.HandleFunc(is.opts.DefaultRoute, is.handle)
+}
 
+func (is *InteractionServer) RegisterCommand(cmd managers.DapperCommand) {
+	is.commandManager.Register(cmd)
 }
 
 func (is *InteractionServer) Listen(port int) {
@@ -123,6 +134,7 @@ func NewInteractionServer(publicKey string) InteractionServer {
 
 func NewInteractionServerWithOptions(iso InteractionServerOptions) InteractionServer {
 	return InteractionServer{
-		opts: iso,
+		opts:           iso,
+		commandManager: managers.NewDapperCommandManager(),
 	}
 }
