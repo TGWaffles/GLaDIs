@@ -1,23 +1,12 @@
-package managers
+package dapper
 
 import (
 	"fmt"
 
+	"github.com/JackHumphries9/dapper-go/client"
 	"github.com/JackHumphries9/dapper-go/discord"
 	"github.com/JackHumphries9/dapper-go/discord/interaction_callback_type"
 )
-
-type DapperCommandExecutor func(itx *discord.Interaction)
-
-type DapperCommandOptions struct {
-	Ephemeral bool
-}
-
-type DapperCommand struct {
-	Command        discord.ApplicationCommandData
-	CommandOptions DapperCommandOptions
-	Executor       DapperCommandExecutor
-}
 
 type DapperCommandManager struct {
 	commands []DapperCommand
@@ -55,4 +44,14 @@ func (dcm *DapperCommandManager) RouteInteraction(itx *discord.Interaction) (dis
 	}
 
 	return discord.InteractionResponse{}, fmt.Errorf("No command found")
+}
+
+func (dcm *DapperCommandManager) RegisterCommandsWithDiscord(appId discord.Snowflake, botClient *client.BotClient) error {
+	discordCommands := make([]client.CreateApplicationCommand, 0, len(dcm.commands))
+
+	for _, cmd := range dcm.commands {
+		discordCommands = append(discordCommands, cmd.Command)
+	}
+
+	return botClient.GetApplicationClient(appId).RegisterCommands(discordCommands)
 }

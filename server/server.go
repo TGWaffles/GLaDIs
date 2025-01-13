@@ -9,9 +9,10 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/JackHumphries9/dapper-go/client"
+	"github.com/JackHumphries9/dapper-go/dapper"
 	"github.com/JackHumphries9/dapper-go/discord"
 	"github.com/JackHumphries9/dapper-go/discord/interaction_type"
-	"github.com/JackHumphries9/dapper-go/managers"
 	"github.com/JackHumphries9/dapper-go/verification"
 )
 
@@ -27,7 +28,7 @@ var defaultConfig = InteractionServerOptions{
 
 type InteractionServer struct {
 	opts           InteractionServerOptions
-	commandManager managers.DapperCommandManager
+	commandManager dapper.DapperCommandManager
 }
 
 func (is *InteractionServer) handle(w http.ResponseWriter, r *http.Request) {
@@ -103,8 +104,12 @@ func (is *InteractionServer) registerRoute() {
 	http.HandleFunc(is.opts.DefaultRoute, is.handle)
 }
 
-func (is *InteractionServer) RegisterCommand(cmd managers.DapperCommand) {
+func (is *InteractionServer) RegisterCommand(cmd dapper.DapperCommand) {
 	is.commandManager.Register(cmd)
+}
+
+func (is *InteractionServer) RegisterCommandsWithDiscord(appId discord.Snowflake, client *client.BotClient) error {
+	return is.commandManager.RegisterCommandsWithDiscord(appId, client)
 }
 
 func (is *InteractionServer) Listen(port int) {
@@ -135,6 +140,6 @@ func NewInteractionServer(publicKey string) InteractionServer {
 func NewInteractionServerWithOptions(iso InteractionServerOptions) InteractionServer {
 	return InteractionServer{
 		opts:           iso,
-		commandManager: managers.NewDapperCommandManager(),
+		commandManager: dapper.NewDapperCommandManager(),
 	}
 }
