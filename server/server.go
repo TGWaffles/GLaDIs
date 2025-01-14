@@ -111,6 +111,11 @@ func (is *InteractionServer) registerRoute() {
 
 func (is *InteractionServer) RegisterCommand(cmd dapper.DapperCommand) {
 	is.commandManager.Register(cmd)
+
+	for _, comp := range cmd.GetComponents() {
+		is.componentManager.Register(comp)
+	}
+
 }
 
 func (is *InteractionServer) RegisterComponent(comp dapper.DapperComponent) {

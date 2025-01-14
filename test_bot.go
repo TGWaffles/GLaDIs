@@ -77,6 +77,8 @@ func main() {
 		},
 	}
 
+	cmdTest.AddComponent(comp)
+
 	botServer.RegisterCommand(cmdTest)
 
 	botServer.RegisterCommand(dapper.DapperCommand{
@@ -102,8 +104,6 @@ func main() {
 
 		},
 	})
-
-	botServer.RegisterComponent(comp)
 
 	err = botServer.RegisterCommandsWithDiscord(appId, botClient)
 

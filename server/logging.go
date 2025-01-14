@@ -25,6 +25,6 @@ var DefaultLogger = DapperLogger{
 		log.Println(message)
 	},
 	Error: func(message string) {
-		log.Fatalln(message)
+		log.Printf("Error: %s\n", message)
 	},
 }

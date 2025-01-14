@@ -12,7 +12,16 @@ type DapperCommandOptions struct {
 }
 
 type DapperCommand struct {
-	Command        client.CreateApplicationCommand
-	CommandOptions DapperCommandOptions
-	OnCommand       DapperCommandExecutor
+	Command              client.CreateApplicationCommand
+	associatedComponents []DapperComponent
+	CommandOptions       DapperCommandOptions
+	OnCommand            DapperCommandExecutor
+}
+
+func (dc *DapperCommand) AddComponent(component DapperComponent) {
+	dc.associatedComponents = append(dc.associatedComponents, component)
+}
+
+func (dc *DapperCommand) GetComponents() []DapperComponent {
+	return dc.associatedComponents
 }
