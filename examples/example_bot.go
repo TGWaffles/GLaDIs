@@ -8,19 +8,18 @@ import (
 	"github.com/JackHumphries9/dapper-go/dapper"
 	"github.com/JackHumphries9/dapper-go/discord"
 	"github.com/JackHumphries9/dapper-go/discord/button_style"
+	"github.com/JackHumphries9/dapper-go/helpers"
 	"github.com/JackHumphries9/dapper-go/server"
-	"github.com/icza/gox/gox"
-	"github.com/joho/godotenv"
 )
 
 var comp = dapper.DapperButton{
 	Component: &discord.Button{
 		Style: button_style.Primary,
-		Label: gox.Ptr("Next"),
+		Label: helpers.Ptr("Next"),
 		Emoji: &discord.Emoji{
-			Name: gox.Ptr("➡️"),
+			Name: helpers.Ptr("➡️"),
 		},
-		CustomId: gox.Ptr("hello-next1"),
+		CustomId: helpers.Ptr("hello-next1"),
 	},
 	OnPress: func(itx *discord.Interaction) {
 		err := itx.EditResponse(discord.ResponseEditData{
@@ -38,7 +37,6 @@ var comp = dapper.DapperButton{
 }
 
 func main() {
-	godotenv.Load()
 	botServer := server.NewInteractionServer(os.Getenv("PUBLIC_KEY"))
 	botClient := client.NewBot(os.Getenv("BOT_TOKEN"))
 	appId, err := discord.GetSnowflake(os.Getenv("APP_ID"))
@@ -50,7 +48,7 @@ func main() {
 	cmdTest := dapper.DapperCommand{
 		Command: client.CreateApplicationCommand{
 			Name:        "hello",
-			Description: gox.Ptr("Test Description"),
+			Description: helpers.Ptr("Test Description"),
 		}, CommandOptions: dapper.DapperCommandOptions{
 			Ephemeral: false,
 		},
@@ -84,7 +82,7 @@ func main() {
 	botServer.RegisterCommand(dapper.DapperCommand{
 		Command: client.CreateApplicationCommand{
 			Name:        "world",
-			Description: gox.Ptr("The World!"),
+			Description: helpers.Ptr("The World!"),
 		}, CommandOptions: dapper.DapperCommandOptions{
 			Ephemeral: false,
 		},
