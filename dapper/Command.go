@@ -14,5 +14,5 @@ type DapperCommandOptions struct {
 type DapperCommand struct {
 	Command        client.CreateApplicationCommand
 	CommandOptions DapperCommandOptions
-	Executor       DapperCommandExecutor
+	OnCommand       DapperCommandExecutor
 }

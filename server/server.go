@@ -27,8 +27,9 @@ var defaultConfig = InteractionServerOptions{
 }
 
 type InteractionServer struct {
-	opts           InteractionServerOptions
-	commandManager dapper.DapperCommandManager
+	opts             InteractionServerOptions
+	commandManager   dapper.DapperCommandManager
+	componentManager dapper.DapperComponentManager
 }
 
 func (is *InteractionServer) handle(w http.ResponseWriter, r *http.Request) {
@@ -73,13 +74,16 @@ func (is *InteractionServer) handle(w http.ResponseWriter, r *http.Request) {
 
 	if interaction.Type == interaction_type.ApplicationCommand {
 		interactionResponse, err = is.commandManager.RouteInteraction(interaction)
-	}
-	if interaction.Type == interaction_type.MessageComponent {
-
+	} else if interaction.Type == interaction_type.MessageComponent {
+		interactionResponse, err = is.componentManager.RouteInteraction(interaction)
+	} else {
+		fmt.Printf("Unknown interaction type: %d\n", interaction.Type)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	if err != nil {
-		fmt.Printf("An error occured while handling the interaction")
+		fmt.Printf("An error occured while handling the interaction: %+v", err)
 
 		// TODO: Add better error handling
 		w.WriteHeader(500)
@@ -108,6 +112,10 @@ func (is *InteractionServer) RegisterCommand(cmd dapper.DapperCommand) {
 	is.commandManager.Register(cmd)
 }
 
+func (is *InteractionServer) RegisterComponent(comp dapper.DapperComponent) {
+	is.componentManager.Register(comp)
+}
+
 func (is *InteractionServer) RegisterCommandsWithDiscord(appId discord.Snowflake, client *client.BotClient) error {
 	return is.commandManager.RegisterCommandsWithDiscord(appId, client)
 }
@@ -116,6 +124,8 @@ func (is *InteractionServer) Listen(port int) {
 	is.registerRoute()
 
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+
+	fmt.Printf("Serving Discord Interactions on http://localhost:%d\n", port)
 
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
@@ -139,7 +149,8 @@ func NewInteractionServer(publicKey string) InteractionServer {
 
 func NewInteractionServerWithOptions(iso InteractionServerOptions) InteractionServer {
 	return InteractionServer{
-		opts:           iso,
-		commandManager: dapper.NewDapperCommandManager(),
+		opts:             iso,
+		commandManager:   dapper.NewDapperCommandManager(),
+		componentManager: dapper.NewDapperComponentManager(),
 	}
 }

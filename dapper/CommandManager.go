@@ -33,7 +33,7 @@ func (dcm *DapperCommandManager) RouteInteraction(itx *discord.Interaction) (dis
 				flags = 64
 			}
 
-			go cmd.Executor(itx)
+			go cmd.OnCommand(itx)
 			return discord.InteractionResponse{
 				Type: interaction_callback_type.DeferredChannelMessageWithSource,
 				Data: &discord.MessageCallbackData{

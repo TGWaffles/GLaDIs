@@ -7,10 +7,35 @@ import (
 	"github.com/JackHumphries9/dapper-go/client"
 	"github.com/JackHumphries9/dapper-go/dapper"
 	"github.com/JackHumphries9/dapper-go/discord"
+	"github.com/JackHumphries9/dapper-go/discord/button_style"
 	"github.com/JackHumphries9/dapper-go/server"
 	"github.com/icza/gox/gox"
 	"github.com/joho/godotenv"
 )
+
+var comp = dapper.DapperButton{
+	Component: &discord.Button{
+		Style: button_style.Primary,
+		Label: gox.Ptr("Next"),
+		Emoji: &discord.Emoji{
+			Name: gox.Ptr("➡️"),
+		},
+		CustomId: gox.Ptr("hello-next1"),
+	},
+	OnPress: func(itx *discord.Interaction) {
+		err := itx.EditResponse(discord.ResponseEditData{
+			Embeds: []discord.Embed{
+				{
+					Title: "I'm the second Embed",
+				},
+			},
+		})
+
+		if err != nil {
+			fmt.Printf("failed to send edit response")
+		}
+	},
+}
 
 func main() {
 	godotenv.Load()
@@ -22,18 +47,25 @@ func main() {
 		panic("Heyo you messed up")
 	}
 
-	botServer.RegisterCommand(dapper.DapperCommand{
+	cmdTest := dapper.DapperCommand{
 		Command: client.CreateApplicationCommand{
 			Name:        "hello",
 			Description: gox.Ptr("Test Description"),
 		}, CommandOptions: dapper.DapperCommandOptions{
 			Ephemeral: false,
 		},
-		Executor: func(itx *discord.Interaction) {
+		OnCommand: func(itx *discord.Interaction) {
 			err := itx.EditResponse(discord.ResponseEditData{
 				Embeds: []discord.Embed{
 					{
 						Title: "Hello From Dapper",
+					},
+				},
+				Components: []discord.MessageComponent{
+					&discord.ActionRow{
+						Components: []discord.MessageComponent{
+							comp.Component,
+						},
 					},
 				},
 			})
@@ -43,7 +75,9 @@ func main() {
 			}
 
 		},
-	})
+	}
+
+	botServer.RegisterCommand(cmdTest)
 
 	botServer.RegisterCommand(dapper.DapperCommand{
 		Command: client.CreateApplicationCommand{
@@ -52,7 +86,7 @@ func main() {
 		}, CommandOptions: dapper.DapperCommandOptions{
 			Ephemeral: false,
 		},
-		Executor: func(itx *discord.Interaction) {
+		OnCommand: func(itx *discord.Interaction) {
 			err := itx.EditResponse(discord.ResponseEditData{
 				Embeds: []discord.Embed{
 					{
@@ -68,6 +102,8 @@ func main() {
 
 		},
 	})
+
+	botServer.RegisterComponent(comp)
 
 	err = botServer.RegisterCommandsWithDiscord(appId, botClient)
 
