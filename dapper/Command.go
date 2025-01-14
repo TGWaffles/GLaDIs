@@ -13,15 +13,15 @@ type DapperCommandOptions struct {
 
 type DapperCommand struct {
 	Command              client.CreateApplicationCommand
-	associatedComponents []DapperComponent
+	AssociatedComponents []DapperComponent
 	CommandOptions       DapperCommandOptions
 	OnCommand            DapperCommandExecutor
 }
 
 func (dc *DapperCommand) AddComponent(component DapperComponent) {
-	dc.associatedComponents = append(dc.associatedComponents, component)
+	dc.AssociatedComponents = append(dc.AssociatedComponents, component)
 }
 
 func (dc *DapperCommand) GetComponents() []DapperComponent {
-	return dc.associatedComponents
+	return dc.AssociatedComponents
 }
