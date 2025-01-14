@@ -2,7 +2,6 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/JackHumphries9/dapper-go/discord"
@@ -41,8 +40,6 @@ func (appClient *ApplicationClient) RegisterCommands(cmds []CreateApplicationCom
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("Body: %s\n", body)
 
 	_, err = appClient.MakeRequest(DiscordRequest{
 		Method:         "PUT",

@@ -118,15 +118,23 @@ func (is *InteractionServer) RegisterComponent(comp dapper.DapperComponent) {
 }
 
 func (is *InteractionServer) RegisterCommandsWithDiscord(appId discord.Snowflake, client *client.BotClient) error {
-	return is.commandManager.RegisterCommandsWithDiscord(appId, client)
+	err := is.commandManager.RegisterCommandsWithDiscord(appId, client)
+
+	if err != nil {
+		is.logger.Error(fmt.Sprintf("Failed to register discord commands: %v\n", err))
+	} else {
+		is.logger.Info("Successfully registered discord commands")
+	}
+
+	return err
 }
 
 func (is *InteractionServer) Listen(port int) error {
 	is.registerRoute()
 
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
-
 	is.logger.Info(fmt.Sprintf("Serving Discord Interactions on http://localhost:%d\n", port))
+
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 
 	if errors.Is(err, http.ErrServerClosed) {
 		is.logger.Error("Server closed\n")
