@@ -19,6 +19,7 @@ import (
 type InteractionServerOptions struct {
 	PublicKey    ed25519.PublicKey
 	DefaultRoute string
+	DapperLogger *DapperLogger
 }
 
 var defaultConfig = InteractionServerOptions{
@@ -30,19 +31,20 @@ type InteractionServer struct {
 	opts             InteractionServerOptions
 	commandManager   dapper.DapperCommandManager
 	componentManager dapper.DapperComponentManager
+	logger           *DapperLogger
 }
 
 func (is *InteractionServer) handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Only POST method is supported", http.StatusMethodNotAllowed)
+		is.logger.Error("Only POST method is supported")
 		return
 	}
 
-	fmt.Printf("Interaction Recieved\n")
 	verify := verification.Verify(r, is.opts.PublicKey)
 
 	if !verify {
-		fmt.Println("Failed verification")
+		is.logger.Error("Recieved an invalid request")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -51,19 +53,19 @@ func (is *InteractionServer) handle(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err != nil {
-		fmt.Println("Failed to read body")
+		is.logger.Error("Failed to read body")
 		return
 	}
-
-	fmt.Printf("Interaction %s\n", string(rawBody))
 
 	interaction, err := discord.ParseInteraction(string(rawBody))
 
 	if err != nil {
-		fmt.Printf("Failed to parse interaction: %v\n", err)
+		is.logger.Error(fmt.Sprintf("Failed to parse interaction: %v\n", err))
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	is.logger.OnInteractionRecieved(interaction)
 
 	if interaction.IsPing() {
 		discord.CreatePongResponse().ToHttpResponse().WriteResponse(w)
@@ -77,22 +79,21 @@ func (is *InteractionServer) handle(w http.ResponseWriter, r *http.Request) {
 	} else if interaction.Type == interaction_type.MessageComponent {
 		interactionResponse, err = is.componentManager.RouteInteraction(interaction)
 	} else {
-		fmt.Printf("Unknown interaction type: %d\n", interaction.Type)
+		is.logger.Error(fmt.Sprintf("Unknown interaction type: %d\n", interaction.Type))
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	if err != nil {
-		fmt.Printf("An error occured while handling the interaction: %+v", err)
+		is.logger.Error(fmt.Sprintf("An error occured while handling the interaction: %+v", err))
 
-		// TODO: Add better error handling
 		w.WriteHeader(500)
 		return
 	}
 
 	body, err := json.Marshal(interactionResponse)
 	if err != nil {
-		fmt.Printf("An error occured while responding")
+		is.logger.Error("An error occured while responding to interaction")
 		w.WriteHeader(500)
 		return
 	}
@@ -120,18 +121,24 @@ func (is *InteractionServer) RegisterCommandsWithDiscord(appId discord.Snowflake
 	return is.commandManager.RegisterCommandsWithDiscord(appId, client)
 }
 
-func (is *InteractionServer) Listen(port int) {
+func (is *InteractionServer) Listen(port int) error {
 	is.registerRoute()
 
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 
-	fmt.Printf("Serving Discord Interactions on http://localhost:%d\n", port)
+	is.logger.Info(fmt.Sprintf("Serving Discord Interactions on http://localhost:%d\n", port))
 
 	if errors.Is(err, http.ErrServerClosed) {
-		fmt.Printf("server closed\n")
+		is.logger.Error("Server closed\n")
 	} else if err != nil {
-		fmt.Printf("error starting server: %s\n", err)
+		is.logger.Error(fmt.Sprintf("Error starting server: %s\n", err))
 	}
+
+	if err != nil {
+		is.logger.Error(fmt.Sprintf("Error starting server: %s\n", err))
+	}
+
+	return err
 }
 
 func NewInteractionServer(publicKey string) InteractionServer {
@@ -144,6 +151,7 @@ func NewInteractionServer(publicKey string) InteractionServer {
 	return NewInteractionServerWithOptions(InteractionServerOptions{
 		PublicKey:    ed25519.PublicKey(key),
 		DefaultRoute: defaultConfig.DefaultRoute,
+		DapperLogger: &DefaultLogger,
 	})
 }
 
@@ -152,5 +160,6 @@ func NewInteractionServerWithOptions(iso InteractionServerOptions) InteractionSe
 		opts:             iso,
 		commandManager:   dapper.NewDapperCommandManager(),
 		componentManager: dapper.NewDapperComponentManager(),
+		logger:           iso.DapperLogger,
 	}
 }
