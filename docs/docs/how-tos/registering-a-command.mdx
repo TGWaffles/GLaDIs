@@ -1,0 +1,66 @@
+---
+sidebar_position: 2
+---
+
+# Creating A Command
+
+Dapper Go commands contain three parts. The Discord command, any command options such as whether the command should be ephemeral or not and a handler function. When a command is registered Dapper Go routes incoming command interactions to that handler function.
+
+## Defining A Command
+
+To define a command, the `dapper.DapperCommand{}` structure should be used.
+
+```go
+var my_command = dapper.DapperCommand{
+	Command: client.CreateApplicationCommand{
+		Name:        "my-command",
+		Description: helpers.Ptr("An example Dapper Go Command"),
+	},
+	CommandOptions: dapper.DapperCommandOptions{
+		Ephemeral: true,
+	},
+	OnCommand: func (itx *discord.Interaction) {
+		err := itx.EditResponse(discord.ResponseEditData{
+			Content: helpers.Ptr("Hello World!")
+		})
+
+		if err != nil {
+			log.Printf("failed to send edit response")
+		}
+	},
+}
+```
+
+## Registering A Command
+
+Once you have defined a command, you need to register the command with the interaction server. To do this, use the `RegisterCommand()` function providing a `dapper.DapperCommand{}` structure as the argument.
+
+```go
+func main() {
+	interactionServer := server.NewInteractionServer("You should put your discord public key here")
+
+	interactionServer.RegisterCommand(my_command)
+
+	interactionServer.Listen(3000)
+}
+```
+
+## Registering A Command With Discord
+
+Dapper doesn't automatically register commands with Discord. You must further use the `RegisterCommandsWithDiscord()` function, providing your application id and a bot client instance. See the bot client page for more details on this.
+
+
+```go
+func main() {
+	interactionServer := server.NewInteractionServer("You should put your discord public key here")
+	botClient := client.NewBot("Your bot token here")
+
+	appId, err := discord.GetSnowflake(os.Getenv("Your app id here"))
+
+	interactionServer.RegisterCommand(my_command)
+
+	botServer.RegisterCommandsWithDiscord(appId, botClient)
+
+	interactionServer.Listen(3000)
+}
+```

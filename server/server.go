@@ -169,6 +169,10 @@ func NewInteractionServer(publicKey string) InteractionServer {
 }
 
 func NewInteractionServerWithOptions(iso InteractionServerOptions) InteractionServer {
+	if iso.DapperLogger == nil {
+		iso.DapperLogger = &DefaultLogger
+	}
+
 	return InteractionServer{
 		opts:             iso,
 		commandManager:   dapper.NewDapperCommandManager(),
