@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/JackHumphries9/dapper-go/discord"
+	"github.com/JackHumphries9/dapper-go/discord/interaction_context_type"
 )
 
 type ApplicationClient struct {
@@ -13,18 +14,18 @@ type ApplicationClient struct {
 }
 
 type CreateApplicationCommand struct {
-	Name                     string                             `json:"name"`
-	NameLocalizations        map[string]string                  `json:"name_localizations,omitempty"`
-	Description              *string                            `json:"description,omitempty"`
-	DescriptionLocalizations map[string]string                  `json:"description_localizations,omitempty"`
-	Options                  []discord.ApplicationCommandOption `json:"options,omitempty"`
-	DefaultMemberPermissions *string                            `json:"default_member_permissions,omitempty"`
-	DMPermission             *bool                              `json:"dm_permission,omitempty"`
-	DefaultPermission        *bool                              `json:"default_permission,omitempty"`
-	IntegrationTypes         []string                           `json:"integration_types,omitempty"`
-	Contexts                 []string                           `json:"contexts,omitempty"`
-	Type                     *int                               `json:"type,omitempty"`
-	NSFW                     *bool                              `json:"nsfw,omitempty"`
+	Name                     string                                            `json:"name"`
+	NameLocalizations        map[string]string                                 `json:"name_localizations,omitempty"`
+	Description              *string                                           `json:"description,omitempty"`
+	DescriptionLocalizations map[string]string                                 `json:"description_localizations,omitempty"`
+	Options                  []discord.ApplicationCommandOption                `json:"options,omitempty"`
+	DefaultMemberPermissions *string                                           `json:"default_member_permissions,omitempty"`
+	DMPermission             *bool                                             `json:"dm_permission,omitempty"`
+	DefaultPermission        *bool                                             `json:"default_permission,omitempty"`
+	IntegrationTypes         []string                                          `json:"integration_types,omitempty"`
+	Contexts                 []interaction_context_type.InteractionContextType `json:"contexts,omitempty"`
+	Type                     *int                                              `json:"type,omitempty"`
+	NSFW                     *bool                                             `json:"nsfw,omitempty"`
 }
 
 func (appClient *ApplicationClient) MakeRequest(discordRequest DiscordRequest) (response *http.Response, err error) {

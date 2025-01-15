@@ -7,7 +7,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 const config: Config = {
     title: "Dapper Go",
     tagline: "Discord Application Wrapper for Go (HTTP Only)",
-    favicon: "img/favicon.ico",
+    favicon: "img/favicon/favicon.ico",
 
     // Set the production url of your site here
     url: "https://dapper-go.jackh.club",

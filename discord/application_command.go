@@ -35,6 +35,6 @@ type ApplicationCommandOption struct {
 
 type ApplicationCommandOptionChoice struct {
 	Name              string            `json:"name"`
-	Value             interface{}       `json:"value"` // Can be string, integer, or double
+	Value             interface{}       `json:"value"`
 	NameLocalizations map[string]string `json:"name_localizations,omitempty"`
 }

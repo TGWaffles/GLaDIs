@@ -9,27 +9,29 @@ import (
 	"net/http"
 
 	"github.com/JackHumphries9/dapper-go/discord/interaction_callback_type"
+	"github.com/JackHumphries9/dapper-go/discord/interaction_context_type"
 	"github.com/JackHumphries9/dapper-go/discord/interaction_type"
 )
 
 type Interaction struct {
-	Id             Snowflake                        `json:"id"`
-	ApplicationId  Snowflake                        `json:"application_id"`
-	Type           interaction_type.InteractionType `json:"type"`
-	DataInternal   *json.RawMessage                 `json:"data,omitempty"`
-	Data           InteractionData                  `json:"-"`
-	GuildId        *Snowflake                       `json:"guild_id,omitempty"`
-	Channel        *Channel                         `json:"channel,omitempty"`
-	ChannelId      *Snowflake                       `json:"channel_id,omitempty"`
-	Member         *Member                          `json:"member,omitempty"`
-	User           *User                            `json:"user,omitempty"`
-	Token          string                           `json:"token"`
-	Version        int                              `json:"version"`
-	Message        *Message                         `json:"message,omitempty"`
-	AppPermissions *Permissions                     `json:"permissions,omitempty"`
-	Locale         string                           `json:"locale"`
-	GuildLocale    string                           `json:"guild_locale"`
-	hook           *Webhook                         // Used for responding to the interaction
+	Id             Snowflake                                        `json:"id"`
+	ApplicationId  Snowflake                                        `json:"application_id"`
+	Type           interaction_type.InteractionType                 `json:"type"`
+	DataInternal   *json.RawMessage                                 `json:"data,omitempty"`
+	Data           InteractionData                                  `json:"-"`
+	GuildId        *Snowflake                                       `json:"guild_id,omitempty"`
+	Channel        *Channel                                         `json:"channel,omitempty"`
+	ChannelId      *Snowflake                                       `json:"channel_id,omitempty"`
+	Member         *Member                                          `json:"member,omitempty"`
+	User           *User                                            `json:"user,omitempty"`
+	Token          string                                           `json:"token"`
+	Version        int                                              `json:"version"`
+	Message        *Message                                         `json:"message,omitempty"`
+	AppPermissions *Permissions                                     `json:"permissions,omitempty"`
+	Locale         string                                           `json:"locale"`
+	GuildLocale    string                                           `json:"guild_locale"`
+	hook           *Webhook                                         // Used for responding to the interaction
+	Context        *interaction_context_type.InteractionContextType `json:"context,omitempty"`
 }
 
 type InteractionData interface {
