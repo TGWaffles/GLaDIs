@@ -2,7 +2,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/JackHumphries9/dapper-go">
-    <img src="./logo.png" alt="Logo" width="80" height="80" style="border-radius: 25px">
+    <img src="./docs/static/img/dapper-icon.png" alt="Logo" width="80" height="80" style="border-radius: 25px">
   </a>
 
 <h3 align="center">Dapper Go</h3>
