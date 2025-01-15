@@ -9,7 +9,7 @@ import (
 	"github.com/JackHumphries9/dapper-go/helpers"
 )
 
-var Comand = dapper.DapperCommand{
+var Command = dapper.DapperCommand{
 	Command: client.CreateApplicationCommand{
 		Name:        "ping",
 		Description: helpers.Ptr("Ping Pong!"),

@@ -10,7 +10,6 @@ import (
 )
 
 var nextPageButton = discord.Button{
-	Label: helpers.Ptr("Next"),
 	Emoji: &discord.Emoji{
 		Name: helpers.Ptr("➡️"),
 	},
@@ -23,7 +22,7 @@ var nextPageButtonComponent = dapper.DapperButton{
 	OnPress: func(itx *discord.Interaction) {
 		err := itx.EditResponse(discord.ResponseEditData{
 			Embeds:     []discord.Embed{secondEmbed},
-			Components: helpers.CreateActionRow(&nextPageButton),
+			Components: helpers.CreateActionRow(&backPageButton),
 		})
 
 		if err != nil {
@@ -33,11 +32,10 @@ var nextPageButtonComponent = dapper.DapperButton{
 }
 
 var backPageButton = discord.Button{
-	Label: helpers.Ptr("Back"),
 	Emoji: &discord.Emoji{
-		Name: helpers.Ptr("➡️"),
+		Name: helpers.Ptr("⬅️"),
 	},
-	Style:    button_style.Primary,
+	Style:    button_style.Secondary,
 	CustomId: helpers.Ptr("button-back"),
 }
 
@@ -45,8 +43,8 @@ var backPageButtonComponent = dapper.DapperButton{
 	Component: &backPageButton,
 	OnPress: func(itx *discord.Interaction) {
 		err := itx.EditResponse(discord.ResponseEditData{
-			Embeds:     []discord.Embed{secondEmbed},
-			Components: helpers.CreateActionRow(&backPageButton),
+			Embeds:     []discord.Embed{firstEmbed},
+			Components: helpers.CreateActionRow(&nextPageButton),
 		})
 
 		if err != nil {
