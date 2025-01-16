@@ -56,6 +56,15 @@ func (ic *InteractionContext) Defer() {
 			},
 		}
 	}
+
+	if ic.Interaction.Type == interaction_type.ModalSubmit {
+		ic.DeferChannel <- &discord.InteractionResponse{
+			Type: interaction_callback_type.DeferredChannelMessageWithSource,
+			Data: &discord.MessageCallbackData{
+				Flags: helpers.Ptr(int(ic.messageFlags)),
+			},
+		}
+	}
 }
 
 func (ic *InteractionContext) Respond(msg discord.ResponseEditData) error {
@@ -69,6 +78,8 @@ func (ic *InteractionContext) Respond(msg discord.ResponseEditData) error {
 		responseType = interaction_callback_type.ChannelMessageWithSource
 	} else if ic.Interaction.Type == interaction_type.MessageComponent {
 		responseType = interaction_callback_type.UpdateMessage
+	} else if ic.Interaction.Type == interaction_type.ModalSubmit {
+		responseType = interaction_callback_type.ChannelMessageWithSource
 	}
 
 	ic.DeferChannel <- &discord.InteractionResponse{
@@ -90,8 +101,9 @@ func (ic *InteractionContext) ShowModal(modal Modal) error {
 		return fmt.Errorf("Cannot show modal after deferring")
 	}
 
-	mD := modal.GetModalResponse()
-	ic.DeferChannel <- &mD
-
+	ic.DeferChannel <- &discord.InteractionResponse{
+		Type: interaction_callback_type.Modal,
+		Data: modal.Modal,
+	}
 	return nil
 }

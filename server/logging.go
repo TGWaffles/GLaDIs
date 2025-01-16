@@ -19,6 +19,8 @@ var DefaultLogger = DapperLogger{
 			log.Printf("Recieved command %s\n", itx.Data.(*discord.ApplicationCommandData).Name)
 		} else if itx.Type == interaction_type.MessageComponent {
 			log.Printf("Recieved message component %s\n", itx.Data.(*discord.MessageComponentData).CustomId)
+		} else if itx.Type == interaction_type.ModalSubmit {
+			log.Printf("Recieved modal submit %s\n", itx.Data.(*discord.ModalSubmitData).CustomId)
 		}
 	},
 	Info: func(message string) {

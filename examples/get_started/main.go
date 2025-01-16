@@ -2,6 +2,7 @@ package main
 
 import (
 	button_command "dapper-go/get_started/commands/button"
+	modal_command "dapper-go/get_started/commands/modal"
 	ping_command "dapper-go/get_started/commands/ping"
 	"encoding/json"
 	"os"
@@ -49,6 +50,7 @@ func main() {
 
 	botServer.RegisterCommand(button_command.Command)
 	botServer.RegisterCommand(ping_command.Command)
+	botServer.RegisterCommand(modal_command.Command)
 
 	botServer.RegisterCommandsWithDiscord(appId, botClient)
 

@@ -40,7 +40,7 @@ func (dcm *CommandManager) RouteInteraction(itx *discord.Interaction) (discord.I
 		return *response, nil
 	}
 
-	return discord.InteractionResponse{}, fmt.Errorf("No command found")
+	return discord.InteractionResponse{}, fmt.Errorf("Cannot find command: %s", commandData.Name)
 }
 
 func (dcm *CommandManager) Register(command interactable.Command) {

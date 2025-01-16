@@ -80,6 +80,8 @@ func (is *InteractionServer) handle(w http.ResponseWriter, r *http.Request) {
 		interactionResponse, err = is.commandManager.RouteInteraction(interaction)
 	} else if interaction.Type == interaction_type.MessageComponent {
 		interactionResponse, err = is.componentManager.RouteInteraction(interaction)
+	} else if interaction.Type == interaction_type.ModalSubmit {
+		interactionResponse, err = is.modalManager.RouteInteraction(interaction)
 	} else {
 		is.logger.Error(fmt.Sprintf("Unknown interaction type: %d\n", interaction.Type))
 		w.WriteHeader(http.StatusBadRequest)
@@ -125,6 +127,10 @@ func (is *InteractionServer) RegisterCommand(cmd interactable.Command) {
 
 func (is *InteractionServer) RegisterComponent(comp interactable.Component) {
 	is.componentManager.Register(comp)
+}
+
+func (is *InteractionServer) RegisterModal(modal interactable.Modal) {
+	is.modalManager.Register(modal)
 }
 
 func (is *InteractionServer) RegisterCommandsWithDiscord(appId discord.Snowflake, client *client.BotClient) error {
@@ -182,6 +188,7 @@ func NewInteractionServerWithOptions(iso InteractionServerOptions) InteractionSe
 		opts:             iso,
 		commandManager:   managers.NewDapperCommandManager(),
 		componentManager: managers.NewDapperComponentManager(),
+		modalManager:     managers.NewDapperModalManager(),
 		logger:           iso.DapperLogger,
 	}
 }

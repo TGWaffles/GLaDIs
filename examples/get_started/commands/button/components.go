@@ -2,6 +2,7 @@ package button_command
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/JackHumphries9/dapper-go/discord"
 	"github.com/JackHumphries9/dapper-go/discord/button_style"
@@ -20,6 +21,11 @@ var nextPageButton = discord.Button{
 var nextPageButtonComponent = interactable.Button{
 	Component: &nextPageButton,
 	OnPress: func(itx *interactable.InteractionContext) {
+		itx.SetEphemeral(true)
+		itx.Defer()
+
+		time.Sleep(5 * time.Second)
+
 		err := itx.Respond(discord.ResponseEditData{
 			Embeds:     []discord.Embed{secondEmbed},
 			Components: helpers.CreateActionRow(&backPageButton),
@@ -42,6 +48,11 @@ var backPageButton = discord.Button{
 var backPageButtonComponent = interactable.Button{
 	Component: &backPageButton,
 	OnPress: func(itx *interactable.InteractionContext) {
+		itx.SetEphemeral(true)
+		itx.Defer()
+
+		time.Sleep(5 * time.Second)
+
 		err := itx.Respond(discord.ResponseEditData{
 			Embeds:     []discord.Embed{firstEmbed},
 			Components: helpers.CreateActionRow(&nextPageButton),

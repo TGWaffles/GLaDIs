@@ -2,6 +2,7 @@ package discord
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/JackHumphries9/dapper-go/discord/component_type"
 	"github.com/JackHumphries9/dapper-go/discord/text_input_style"
@@ -19,12 +20,26 @@ func (m *ModalSubmitData) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	m.CustomId = dataMap["custom_id"].(string)
-	components := dataMap["components"].([]interface{})
+	if customId, ok := dataMap["custom_id"].(string); ok {
+		m.CustomId = customId
+	} else {
+		return fmt.Errorf("custom_id is missing or not a string")
+	}
 
-	for _, component := range components {
+	components, ok := dataMap["components"].([]interface{})
+	if !ok {
+		return fmt.Errorf("components is missing or not an array")
+	}
+
+	for _, rawComponent := range components {
+		componentData, err := json.Marshal(rawComponent)
+		if err != nil {
+			return fmt.Errorf("failed to re-marshal component: %v", err)
+		}
+
 		var messageComponent MessageComponentWrapper
-		err = json.Unmarshal([]byte(component.(string)), &messageComponent)
+
+		err = json.Unmarshal(componentData, &messageComponent)
 		if err != nil {
 			return err
 		}
@@ -39,10 +54,10 @@ type TextInput struct {
 	CustomId      string                          `json:"custom_id"`
 	Style         text_input_style.TextInputStyle `json:"style"`
 	Label         string                          `json:"label"`
-	MinLength     int                             `json:"min_length"`
-	MaxLength     int                             `json:"max_length"`
+	MinLength     *int                            `json:"min_length,omitempty"`
+	MaxLength     *int                            `json:"max_length,omitempty"`
 	Required      bool                            `json:"required"`
-	Value         string                          `json:"value"`
+	Value         *string                         `json:"value,omitempty"`
 	Placeholder   string                          `json:"placeholder"`
 }
 
@@ -92,16 +107,16 @@ func (t *TextInput) Verify() error {
 		}
 	}
 
-	if len(t.Value) > 4000 {
-		return ErrInvalidPropertyLength{
-			Component:      t,
-			PropertyName:   "value",
-			MaxLength:      4000,
-			MinLength:      1,
-			PropertyLength: len(t.Value),
-			PropertyValue:  t.Value,
-		}
-	}
+	// if len(t.Value) > 4000 {
+	// 	return ErrInvalidPropertyLength{
+	// 		Component:      t,
+	// 		PropertyName:   "value",
+	// 		MaxLength:      4000,
+	// 		MinLength:      1,
+	// 		PropertyLength: len(t.Value),
+	// 		PropertyValue:  t.Value,
+	// 	}
+	// }
 
 	if len(t.Placeholder) > 100 {
 		return ErrInvalidPropertyLength{

@@ -7,7 +7,7 @@ import (
 
 	"github.com/JackHumphries9/dapper-go/client"
 	"github.com/JackHumphries9/dapper-go/discord"
-	"github.com/JackHumphries9/dapper-go/discord/button_style"
+	"github.com/JackHumphries9/dapper-go/discord/text_input_style"
 	"github.com/JackHumphries9/dapper-go/helpers"
 	"github.com/JackHumphries9/dapper-go/interactable"
 	"github.com/JackHumphries9/dapper-go/server"
@@ -38,49 +38,64 @@ func LoadJSONEnv() Env {
 	return data
 }
 
-var firstEmbed = discord.Embed{
-	Title:       "Page 1",
-	Description: "I'm the first page!",
-}
-
-var secondEmbed = discord.Embed{
-	Title:       "Page 2",
-	Description: "I'm the second page!",
-}
-
-var nextPageButton = discord.Button{
-	Emoji: &discord.Emoji{
-		Name: helpers.Ptr("➡️"),
+var Modal = interactable.Modal{
+	Modal: discord.ModalCallback{
+		Title:    "Example Modal",
+		CustomId: "modal-example",
+		Components: []discord.MessageComponent{
+			&discord.ActionRow{
+				Components: []discord.MessageComponent{
+					&discord.TextInput{
+						Label:       "Name",
+						Placeholder: "Your name here...",
+						Style:       text_input_style.Short,
+						CustomId:    "me-name",
+						Required:    true,
+						MinLength:   helpers.Ptr(3),
+						MaxLength:   helpers.Ptr(100),
+					},
+				},
+			},
+			&discord.ActionRow{
+				Components: []discord.MessageComponent{
+					&discord.TextInput{
+						Label:       "A fact about you",
+						Placeholder: "Your fact here...",
+						Style:       text_input_style.Long,
+						CustomId:    "me-fact",
+						Required:    true,
+						MinLength:   helpers.Ptr(3),
+						MaxLength:   helpers.Ptr(250),
+					},
+				},
+			},
+		},
 	},
-	Style:    button_style.Primary,
-	CustomId: helpers.Ptr("button-next"),
-}
+	OnSubmit: func(itc *interactable.InteractionContext) {
+		submissionData := itc.Interaction.Data.(*discord.ModalSubmitData)
 
-var nextPageButtonComponent = interactable.Button{
-	Component: &nextPageButton,
-}
+		fmt.Printf("Submitted modal")
 
-var backPageButton = discord.Button{
-	Emoji: &discord.Emoji{
-		Name: helpers.Ptr("⬅️"),
+		valueMap := map[string]string{}
+
+		for _, component := range submissionData.Components {
+			textInput := component.(*discord.ActionRow).Components[0].(*discord.TextInput)
+			valueMap[textInput.CustomId] = *textInput.Value
+		}
+
+		err := itc.Respond(discord.ResponseEditData{
+			Embeds: []discord.Embed{
+				{
+					Title:       "Your Results!",
+					Description: fmt.Sprintf("You are %s and your fact is: %s", valueMap["me-name"], valueMap["me-fact"]),
+				},
+			},
+		})
+
+		if err != nil {
+			fmt.Printf("Failed to edit response")
+		}
 	},
-	Style:    button_style.Secondary,
-	CustomId: helpers.Ptr("button-back"),
-}
-
-var backPageButtonComponent = interactable.Button{
-	Component: &backPageButton,
-}
-
-func CommandHandler(itx *discord.Interaction) {
-	err := itx.EditResponse(discord.ResponseEditData{
-		Embeds:     []discord.Embed{firstEmbed},
-		Components: helpers.CreateActionRow(&nextPageButton),
-	})
-
-	if err != nil {
-		fmt.Printf("Failed to edit response")
-	}
 }
 
 func main() {
@@ -96,21 +111,17 @@ func main() {
 
 	botServer.RegisterCommand(interactable.Command{
 		Command: client.CreateApplicationCommand{
-			Name:        "ping",
-			Description: helpers.Ptr("Ping Pong!"),
-		},
-		CommandOptions: interactable.CommandOptions{
-			ExperimentalAutoDeferral: true,
+			Name:        "modal",
+			Description: helpers.Ptr("Modal Example"),
 		},
 		OnCommand: func(itc *interactable.InteractionContext) {
-			itc.SetEphemeral(true)
+			err := itc.ShowModal(Modal)
 
-			//time.Sleep(6 * time.Second)
-
-			itc.Respond(discord.ResponseEditData{
-				Content: helpers.Ptr("Pong!"),
-			})
+			if err != nil {
+				fmt.Printf("Failed to edit response")
+			}
 		},
+		AssociatedModals: []interactable.Modal{Modal},
 	})
 
 	//botServer.RegisterCommandsWithDiscord(appId, botClient)

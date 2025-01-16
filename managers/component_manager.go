@@ -33,7 +33,7 @@ func (dcm *ComponentManager) RouteInteraction(itx *discord.Interaction) (discord
 		}
 	}
 
-	return discord.InteractionResponse{}, fmt.Errorf("Cannot find interaction")
+	return discord.InteractionResponse{}, fmt.Errorf("Cannot find interaction: %s", commandData.CustomId)
 }
 
 func (dcm *ComponentManager) Register(comp interactable.Component) {

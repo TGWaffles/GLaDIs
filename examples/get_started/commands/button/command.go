@@ -2,6 +2,7 @@ package button_command
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/JackHumphries9/dapper-go/client"
 	"github.com/JackHumphries9/dapper-go/discord"
@@ -21,6 +22,11 @@ var Command = interactable.Command{
 }
 
 func CommandHandler(itx *interactable.InteractionContext) {
+	itx.SetEphemeral(true)
+	itx.Defer()
+
+	time.Sleep(5 * time.Second)
+
 	err := itx.Respond(discord.ResponseEditData{
 		Embeds:     []discord.Embed{firstEmbed},
 		Components: helpers.CreateActionRow(&nextPageButton),

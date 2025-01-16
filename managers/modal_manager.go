@@ -27,7 +27,7 @@ func (dmm *ModalManager) RouteInteraction(itx *discord.Interaction) (discord.Int
 		return *response, nil
 	}
 
-	return discord.InteractionResponse{}, fmt.Errorf("Cannot find interaction")
+	return discord.InteractionResponse{}, fmt.Errorf("Cannot find interaction %s", submitData.CustomId)
 }
 
 func (dmm *ModalManager) Register(modal interactable.Modal) {
