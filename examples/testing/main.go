@@ -7,6 +7,7 @@ import (
 
 	"github.com/JackHumphries9/dapper-go/client"
 	"github.com/JackHumphries9/dapper-go/discord"
+	"github.com/JackHumphries9/dapper-go/discord/command_option_type"
 	"github.com/JackHumphries9/dapper-go/discord/text_input_style"
 	"github.com/JackHumphries9/dapper-go/helpers"
 	"github.com/JackHumphries9/dapper-go/interactable"
@@ -102,12 +103,12 @@ func main() {
 	var env = LoadJSONEnv()
 
 	botServer := server.NewInteractionServer(env.PublicKey)
-	// botClient := client.NewBot(env.BotToken)
-	// appId, err := discord.GetSnowflake(env.AppId)
+	botClient := client.NewBot(env.BotToken)
+	appId, err := discord.GetSnowflake(env.AppId)
 
-	// if err != nil {
-	// 	panic("Heyo you messed up")
-	// }
+	if err != nil {
+		panic("Heyo you messed up")
+	}
 
 	botServer.RegisterCommand(interactable.Command{
 		Command: client.CreateApplicationCommand{
@@ -124,7 +125,52 @@ func main() {
 		AssociatedModals: []interactable.Modal{Modal},
 	})
 
-	//botServer.RegisterCommandsWithDiscord(appId, botClient)
+	botServer.RegisterCommand(interactable.Command{
+		Command: client.CreateApplicationCommand{
+			Name:        "ping",
+			Description: helpers.Ptr("Ping Pong"),
+			Options: []discord.ApplicationCommandOption{
+				{
+					Type:        command_option_type.User,
+					Name:        "user",
+					Description: "Try getting a user",
+					Required:    helpers.Ptr(true),
+				},
+				{
+					Type:        command_option_type.String,
+					Name:        "msg",
+					Description: "Message",
+					Required:    helpers.Ptr(true),
+				},
+			},
+		},
+		OnCommand: func(itc *interactable.InteractionContext) {
+			helpers.PrintStructAsJSON(itc.Interaction)
+
+			userId, err := itc.GetUserCommandOption("user")
+			msg, err := itc.GetStringCommandOption("msg")
+
+			if err != nil {
+				fmt.Printf("Cannot get name %v", err)
+			}
+
+			userClient := botClient.GetUserClient(*userId)
+
+			userClient.SendMessage(client.SendMessageData{
+				Content: msg,
+			})
+
+			err = itc.Respond(discord.ResponseEditData{
+				Content: helpers.Ptr(fmt.Sprintf("Check the DM's!")),
+			})
+
+			if err != nil {
+				fmt.Printf("cannot respond to message")
+			}
+		},
+	})
+
+	botServer.RegisterCommandsWithDiscord(appId, botClient)
 
 	botServer.Listen(3000)
 }
