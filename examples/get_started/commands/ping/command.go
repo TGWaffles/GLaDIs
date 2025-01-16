@@ -4,18 +4,18 @@ import (
 	"fmt"
 
 	"github.com/JackHumphries9/dapper-go/client"
-	"github.com/JackHumphries9/dapper-go/dapper"
 	"github.com/JackHumphries9/dapper-go/discord"
 	"github.com/JackHumphries9/dapper-go/helpers"
+	"github.com/JackHumphries9/dapper-go/interactable"
 )
 
-var Command = dapper.DapperCommand{
+var Command = interactable.Command{
 	Command: client.CreateApplicationCommand{
 		Name:        "ping",
 		Description: helpers.Ptr("Ping Pong!"),
 	},
-	OnCommand: func(itx *discord.Interaction) {
-		err := itx.EditResponse(discord.ResponseEditData{
+	OnCommand: func(itc *interactable.InteractionContext) {
+		err := itc.Respond(discord.ResponseEditData{
 			Content: helpers.Ptr("Pong!"),
 		})
 

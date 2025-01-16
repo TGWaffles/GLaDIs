@@ -3,10 +3,10 @@ package button_command
 import (
 	"fmt"
 
-	"github.com/JackHumphries9/dapper-go/dapper"
 	"github.com/JackHumphries9/dapper-go/discord"
 	"github.com/JackHumphries9/dapper-go/discord/button_style"
 	"github.com/JackHumphries9/dapper-go/helpers"
+	"github.com/JackHumphries9/dapper-go/interactable"
 )
 
 var nextPageButton = discord.Button{
@@ -17,10 +17,10 @@ var nextPageButton = discord.Button{
 	CustomId: helpers.Ptr("button-next"),
 }
 
-var nextPageButtonComponent = dapper.DapperButton{
+var nextPageButtonComponent = interactable.Button{
 	Component: &nextPageButton,
-	OnPress: func(itx *discord.Interaction) {
-		err := itx.EditResponse(discord.ResponseEditData{
+	OnPress: func(itx *interactable.InteractionContext) {
+		err := itx.Respond(discord.ResponseEditData{
 			Embeds:     []discord.Embed{secondEmbed},
 			Components: helpers.CreateActionRow(&backPageButton),
 		})
@@ -39,10 +39,10 @@ var backPageButton = discord.Button{
 	CustomId: helpers.Ptr("button-back"),
 }
 
-var backPageButtonComponent = dapper.DapperButton{
+var backPageButtonComponent = interactable.Button{
 	Component: &backPageButton,
-	OnPress: func(itx *discord.Interaction) {
-		err := itx.EditResponse(discord.ResponseEditData{
+	OnPress: func(itx *interactable.InteractionContext) {
+		err := itx.Respond(discord.ResponseEditData{
 			Embeds:     []discord.Embed{firstEmbed},
 			Components: helpers.CreateActionRow(&nextPageButton),
 		})

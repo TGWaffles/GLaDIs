@@ -4,27 +4,24 @@ import (
 	"fmt"
 
 	"github.com/JackHumphries9/dapper-go/client"
-	"github.com/JackHumphries9/dapper-go/dapper"
 	"github.com/JackHumphries9/dapper-go/discord"
 	"github.com/JackHumphries9/dapper-go/helpers"
+	"github.com/JackHumphries9/dapper-go/interactable"
 )
 
-var Command = dapper.DapperCommand{
+var Command = interactable.Command{
 	Command: client.CreateApplicationCommand{
 		Name:        "button",
 		Description: helpers.Ptr("Button Command"),
 	},
-	CommandOptions: dapper.DapperCommandOptions{
-		Ephemeral: true,
-	},
 	OnCommand: CommandHandler,
-	AssociatedComponents: []dapper.DapperComponent{
+	AssociatedComponents: []interactable.Component{
 		nextPageButtonComponent, backPageButtonComponent,
 	},
 }
 
-func CommandHandler(itx *discord.Interaction) {
-	err := itx.EditResponse(discord.ResponseEditData{
+func CommandHandler(itx *interactable.InteractionContext) {
+	err := itx.Respond(discord.ResponseEditData{
 		Embeds:     []discord.Embed{firstEmbed},
 		Components: helpers.CreateActionRow(&nextPageButton),
 	})

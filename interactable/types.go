@@ -63,7 +63,7 @@ func (ic *InteractionContext) Respond(msg discord.ResponseEditData) error {
 		return ic.Interaction.EditResponse(msg)
 	}
 
-	var responseType int
+	var responseType interaction_callback_type.InteractionCallbackType
 
 	if ic.Interaction.Type == interaction_type.ApplicationCommand {
 		responseType = interaction_callback_type.ChannelMessageWithSource
@@ -72,10 +72,10 @@ func (ic *InteractionContext) Respond(msg discord.ResponseEditData) error {
 	}
 
 	ic.DeferChannel <- &discord.InteractionResponse{
-		Type: interaction_callback_type.ChannelMessageWithSource,
+		Type: responseType,
 		Data: &discord.MessageCallbackData{
 			Content:         msg.Content,
-			Flags:           &responseType,
+			Flags:           helpers.Ptr(int(ic.messageFlags)),
 			Embeds:          msg.Embeds,
 			Components:      msg.Components,
 			AllowedMentions: msg.AllowedMentions,
