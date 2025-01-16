@@ -10,9 +10,10 @@ import (
 	"net/http"
 
 	"github.com/JackHumphries9/dapper-go/client"
-	"github.com/JackHumphries9/dapper-go/dapper"
 	"github.com/JackHumphries9/dapper-go/discord"
 	"github.com/JackHumphries9/dapper-go/discord/interaction_type"
+	"github.com/JackHumphries9/dapper-go/interactable"
+	"github.com/JackHumphries9/dapper-go/managers"
 	"github.com/JackHumphries9/dapper-go/verification"
 )
 
@@ -29,8 +30,9 @@ var defaultConfig = InteractionServerOptions{
 
 type InteractionServer struct {
 	opts             InteractionServerOptions
-	commandManager   dapper.DapperCommandManager
-	componentManager dapper.DapperComponentManager
+	commandManager   managers.CommandManager
+	componentManager managers.ComponentManager
+	modalManager     managers.ModalManager
 	logger           *DapperLogger
 }
 
@@ -109,16 +111,19 @@ func (is *InteractionServer) registerRoute() {
 	http.HandleFunc(is.opts.DefaultRoute, is.handle)
 }
 
-func (is *InteractionServer) RegisterCommand(cmd dapper.DapperCommand) {
+func (is *InteractionServer) RegisterCommand(cmd interactable.Command) {
 	is.commandManager.Register(cmd)
 
 	for _, comp := range cmd.GetComponents() {
 		is.componentManager.Register(comp)
 	}
 
+	for _, modal := range cmd.GetModals() {
+		is.modalManager.Register(modal)
+	}
 }
 
-func (is *InteractionServer) RegisterComponent(comp dapper.DapperComponent) {
+func (is *InteractionServer) RegisterComponent(comp interactable.Component) {
 	is.componentManager.Register(comp)
 }
 
@@ -175,8 +180,8 @@ func NewInteractionServerWithOptions(iso InteractionServerOptions) InteractionSe
 
 	return InteractionServer{
 		opts:             iso,
-		commandManager:   dapper.NewDapperCommandManager(),
-		componentManager: dapper.NewDapperComponentManager(),
+		commandManager:   managers.NewDapperCommandManager(),
+		componentManager: managers.NewDapperComponentManager(),
 		logger:           iso.DapperLogger,
 	}
 }

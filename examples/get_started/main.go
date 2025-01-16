@@ -3,6 +3,7 @@ package main
 import (
 	button_command "dapper-go/get_started/commands/button"
 	ping_command "dapper-go/get_started/commands/ping"
+	"encoding/json"
 	"os"
 
 	"github.com/JackHumphries9/dapper-go/client"
@@ -18,11 +19,29 @@ type Env struct {
 	AppId     string `json:"APP_ID"`
 }
 
-func main() {
-	botServer := server.NewInteractionServer(os.Getenv("PUBLIC_KEY"))
-	botClient := client.NewBot(os.Getenv("BOT_TOKEN"))
+func LoadJSONEnv() Env {
+	plan, err := os.ReadFile(FILENAME)
 
-	appId, err := discord.GetSnowflake(os.Getenv("APP_ID"))
+	if err != nil {
+		panic("no env file")
+	}
+
+	var data Env
+	err = json.Unmarshal(plan, &data)
+
+	if err != nil {
+		panic("cannot unmarshal")
+	}
+
+	return data
+}
+
+func main() {
+	env := LoadJSONEnv()
+	botServer := server.NewInteractionServer(env.PublicKey)
+	botClient := client.NewBot(env.BotToken)
+
+	appId, err := discord.GetSnowflake(env.AppId)
 
 	if err != nil {
 		panic("Heyo you messed up")
