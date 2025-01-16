@@ -129,6 +129,21 @@ func (ic *InteractionContext) GetModalTextInputValue(id string) *string {
 	return nil
 }
 
+func (ic *InteractionContext) GetSelectValues() (*[]string, error) {
+	if ic.Interaction.Type != interaction_type.MessageComponent {
+		return nil, fmt.Errorf("cannot get command options from a non command interaction")
+	}
+
+	selMenu, ok := ic.Interaction.Data.(*discord.MessageComponentData)
+
+	if !ok {
+		return nil, fmt.Errorf("cannot convert to values")
+	}
+
+	return &selMenu.Values, nil
+
+}
+
 func GetCommandOption(itx *discord.Interaction, name string) (*discord.ApplicationCommandDataOption, error) {
 	if itx.Type != interaction_type.ApplicationCommand {
 		return nil, fmt.Errorf("cannot get command options from a non command interaction")

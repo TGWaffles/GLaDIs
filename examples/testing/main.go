@@ -7,8 +7,7 @@ import (
 
 	"github.com/JackHumphries9/dapper-go/client"
 	"github.com/JackHumphries9/dapper-go/discord"
-	"github.com/JackHumphries9/dapper-go/discord/command_option_type"
-	"github.com/JackHumphries9/dapper-go/discord/text_input_style"
+	"github.com/JackHumphries9/dapper-go/discord/component_type"
 	"github.com/JackHumphries9/dapper-go/helpers"
 	"github.com/JackHumphries9/dapper-go/interactable"
 	"github.com/JackHumphries9/dapper-go/server"
@@ -39,62 +38,38 @@ func LoadJSONEnv() Env {
 	return data
 }
 
-var Modal = interactable.Modal{
-	Modal: discord.ModalCallback{
-		Title:    "Example Modal",
-		CustomId: "modal-example",
-		Components: []discord.MessageComponent{
-			&discord.ActionRow{
-				Components: []discord.MessageComponent{
-					&discord.TextInput{
-						Label:       "Name",
-						Placeholder: "Your name here...",
-						Style:       text_input_style.Short,
-						CustomId:    "me-name",
-						Required:    true,
-						MinLength:   helpers.Ptr(3),
-						MaxLength:   helpers.Ptr(100),
-					},
-				},
+var Select = interactable.Select{
+	Component: &discord.SelectMenu{
+		MenuType: component_type.StringSelect,
+		CustomId: "fruits",
+		Options: []discord.SelectOption{
+			{
+				Label: "Apple",
+				Value: "apple",
 			},
-			&discord.ActionRow{
-				Components: []discord.MessageComponent{
-					&discord.TextInput{
-						Label:       "A fact about you",
-						Placeholder: "Your fact here...",
-						Style:       text_input_style.Long,
-						CustomId:    "me-fact",
-						Required:    true,
-						MinLength:   helpers.Ptr(3),
-						MaxLength:   helpers.Ptr(250),
-					},
-				},
+			{
+				Label: "Orange",
+				Value: "orange",
+			},
+			{
+				Label: "Banana",
+				Value: "banana",
 			},
 		},
 	},
-	OnSubmit: func(itc *interactable.InteractionContext) {
-		submissionData := itc.Interaction.Data.(*discord.ModalSubmitData)
+	OnSelect: func(itc *interactable.InteractionContext) {
+		vals, err := itc.GetSelectValues()
 
-		fmt.Printf("Submitted modal")
-
-		valueMap := map[string]string{}
-
-		for _, component := range submissionData.Components {
-			textInput := component.(*discord.ActionRow).Components[0].(*discord.TextInput)
-			valueMap[textInput.CustomId] = *textInput.Value
+		if err != nil {
+			fmt.Printf("failed to get values")
 		}
 
-		err := itc.Respond(discord.ResponseEditData{
-			Embeds: []discord.Embed{
-				{
-					Title:       "Your Results!",
-					Description: fmt.Sprintf("You are %s and your fact is: %s", valueMap["me-name"], valueMap["me-fact"]),
-				},
-			},
+		err = itc.Respond(discord.ResponseEditData{
+			Content: helpers.Ptr(fmt.Sprintf("You chose: %s", (*vals)[0])),
 		})
 
 		if err != nil {
-			fmt.Printf("Failed to edit response")
+			fmt.Printf("cannot respond")
 		}
 	},
 }
@@ -112,61 +87,22 @@ func main() {
 
 	botServer.RegisterCommand(interactable.Command{
 		Command: client.CreateApplicationCommand{
-			Name:        "modal",
-			Description: helpers.Ptr("Modal Example"),
-		},
-		OnCommand: func(itc *interactable.InteractionContext) {
-			err := itc.ShowModal(Modal)
-
-			if err != nil {
-				fmt.Printf("Failed to edit response")
-			}
-		},
-		AssociatedModals: []interactable.Modal{Modal},
-	})
-
-	botServer.RegisterCommand(interactable.Command{
-		Command: client.CreateApplicationCommand{
-			Name:        "ping",
+			Name:        "fruit",
 			Description: helpers.Ptr("Ping Pong"),
-			Options: []discord.ApplicationCommandOption{
-				{
-					Type:        command_option_type.User,
-					Name:        "user",
-					Description: "Try getting a user",
-					Required:    helpers.Ptr(true),
-				},
-				{
-					Type:        command_option_type.String,
-					Name:        "msg",
-					Description: "Message",
-					Required:    helpers.Ptr(true),
-				},
-			},
 		},
 		OnCommand: func(itc *interactable.InteractionContext) {
-			helpers.PrintStructAsJSON(itc.Interaction)
-
-			userId, err := itc.GetUserCommandOption("user")
-			msg, err := itc.GetStringCommandOption("msg")
-
-			if err != nil {
-				fmt.Printf("Cannot get name %v", err)
-			}
-
-			userClient := botClient.GetUserClient(*userId)
-
-			userClient.SendMessage(client.SendMessageData{
-				Content: msg,
-			})
+			itc.SetEphemeral(true)
 
 			err = itc.Respond(discord.ResponseEditData{
-				Content: helpers.Ptr(fmt.Sprintf("Check the DM's!")),
+				Components: helpers.CreateActionRow(Select.Component),
 			})
 
 			if err != nil {
 				fmt.Printf("cannot respond to message")
 			}
+		},
+		AssociatedComponents: []interactable.Component{
+			Select,
 		},
 	})
 

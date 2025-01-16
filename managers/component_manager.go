@@ -17,20 +17,17 @@ func (dcm *ComponentManager) RouteInteraction(itx *discord.Interaction) (discord
 	commandData := itx.Data.(*discord.MessageComponentData)
 
 	if comp, ok := dcm.components[commandData.CustomId]; ok {
-		if comp.Type() == component_type.Button {
-			btn := comp.(interactable.Button)
-
-			itc := interactable.InteractionContext{
-				Interaction:  itx,
-				DeferChannel: make(chan *discord.InteractionResponse),
-			}
-
-			go btn.OnPress(&itc)
-
-			response := <-itc.DeferChannel
-
-			return *response, nil
+		itc := interactable.InteractionContext{
+			Interaction:  itx,
+			DeferChannel: make(chan *discord.InteractionResponse),
 		}
+
+		go comp.OnInteract(&itc)
+
+		response := <-itc.DeferChannel
+
+		return *response, nil
+
 	}
 
 	return discord.InteractionResponse{}, fmt.Errorf("Cannot find interaction: %s", commandData.CustomId)
@@ -41,6 +38,12 @@ func (dcm *ComponentManager) Register(comp interactable.Component) {
 		customId := comp.GetComponent().(*discord.Button).CustomId
 
 		dcm.components[*customId] = comp
+	}
+
+	if comp.Type() == component_type.StringSelect || comp.Type() == component_type.RoleSelect || comp.Type() == component_type.UserSelect || comp.Type() == component_type.MentionableSelect || comp.Type() == component_type.ChannelSelect {
+		customId := comp.GetComponent().(*discord.SelectMenu).CustomId
+
+		dcm.components[customId] = comp
 	}
 }
 

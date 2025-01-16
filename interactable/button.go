@@ -6,7 +6,7 @@ import (
 )
 
 type Button struct {
-	Component discord.MessageComponent
+	Component *discord.Button
 	OnPress   InteractionHandler
 }
 
