@@ -14,7 +14,7 @@ import (
 type InteractionContext struct {
 	Interaction  *discord.Interaction
 	DeferChannel chan *discord.InteractionResponse
-	hasDeferred  bool
+	HasDeferred  bool
 	messageFlags message_flags.MessageFlags
 }
 
@@ -26,17 +26,21 @@ func (ic *InteractionContext) SetEphemeral(ep bool) {
 	}
 }
 
-func (ic *InteractionContext) HasDeferred() bool {
-	return ic.hasDeferred
+func (ic *InteractionContext) GetHasDeferred() bool {
+	return ic.HasDeferred
+}
+
+func (ic *InteractionContext) GetMessaegFlags() message_flags.MessageFlags {
+	return ic.messageFlags
 }
 
 func (ic *InteractionContext) Defer() {
-	if ic.hasDeferred {
+	if ic.HasDeferred {
 		fmt.Printf("Interaction already deferred")
 		return
 	}
 
-	ic.hasDeferred = true
+	ic.HasDeferred = true
 
 	if ic.Interaction.Type == interaction_type.ApplicationCommand {
 		ic.DeferChannel <- &discord.InteractionResponse{
@@ -67,7 +71,7 @@ func (ic *InteractionContext) Defer() {
 }
 
 func (ic *InteractionContext) Respond(msg discord.ResponseEditData) error {
-	if ic.hasDeferred {
+	if ic.HasDeferred {
 		return ic.Interaction.EditResponse(msg)
 	}
 
@@ -96,7 +100,7 @@ func (ic *InteractionContext) Respond(msg discord.ResponseEditData) error {
 }
 
 func (ic *InteractionContext) ShowModal(modal Modal) error {
-	if ic.hasDeferred {
+	if ic.HasDeferred {
 		return fmt.Errorf("Cannot show modal after deferring")
 	}
 

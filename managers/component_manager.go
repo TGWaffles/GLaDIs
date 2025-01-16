@@ -5,6 +5,8 @@ import (
 
 	"github.com/JackHumphries9/dapper-go/discord"
 	"github.com/JackHumphries9/dapper-go/discord/component_type"
+	"github.com/JackHumphries9/dapper-go/discord/interaction_callback_type"
+	"github.com/JackHumphries9/dapper-go/helpers"
 	"github.com/JackHumphries9/dapper-go/interactable"
 )
 
@@ -20,13 +22,17 @@ func (dcm *ComponentManager) RouteInteraction(itx *discord.Interaction) (discord
 		itc := interactable.InteractionContext{
 			Interaction:  itx,
 			DeferChannel: make(chan *discord.InteractionResponse),
+			HasDeferred:  true,
 		}
 
 		go comp.OnInteract(&itc)
 
-		response := <-itc.DeferChannel
-
-		return *response, nil
+		return discord.InteractionResponse{
+			Type: interaction_callback_type.DeferredUpdateMessage,
+			Data: &discord.MessageCallbackData{
+				Flags: helpers.Ptr(int(itc.GetMessaegFlags())),
+			},
+		}, nil
 
 	}
 
