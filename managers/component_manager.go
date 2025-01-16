@@ -22,15 +22,25 @@ func (dcm *ComponentManager) RouteInteraction(itx *discord.Interaction) (discord
 		itc := interactable.InteractionContext{
 			Interaction:  itx,
 			DeferChannel: make(chan *discord.InteractionResponse),
-			HasDeferred:  true,
+			HasDeferred:  !comp.GetComponentOptions().CancelDefer,
+		}
+
+		if comp.GetComponentOptions().Ephemeral {
+			itc.SetEphemeral(true)
 		}
 
 		go comp.OnInteract(&itc)
 
+		if comp.GetComponentOptions().CancelDefer {
+			response := <-itc.DeferChannel
+
+			return *response, nil
+		}
+
 		return discord.InteractionResponse{
 			Type: interaction_callback_type.DeferredUpdateMessage,
 			Data: &discord.MessageCallbackData{
-				Flags: helpers.Ptr(int(itc.GetMessaegFlags())),
+				Flags: helpers.Ptr(int(itc.GetMessageFlags())),
 			},
 		}, nil
 

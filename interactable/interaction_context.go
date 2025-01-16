@@ -30,7 +30,7 @@ func (ic *InteractionContext) GetHasDeferred() bool {
 	return ic.HasDeferred
 }
 
-func (ic *InteractionContext) GetMessaegFlags() message_flags.MessageFlags {
+func (ic *InteractionContext) GetMessageFlags() message_flags.MessageFlags {
 	return ic.messageFlags
 }
 

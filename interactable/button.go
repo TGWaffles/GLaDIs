@@ -6,8 +6,9 @@ import (
 )
 
 type Button struct {
-	Component *discord.Button
-	OnPress   InteractionHandler
+	Component        *discord.Button
+	ComponentOptions ComponentOptions
+	OnPress          InteractionHandler
 }
 
 func (db Button) Type() component_type.ComponentType {
@@ -20,4 +21,8 @@ func (db Button) OnInteract(itc *InteractionContext) {
 
 func (db Button) GetComponent() discord.MessageComponent {
 	return db.Component
+}
+
+func (db Button) GetComponentOptions() ComponentOptions {
+	return db.ComponentOptions
 }

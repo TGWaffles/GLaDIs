@@ -57,6 +57,10 @@ var Select = interactable.Select{
 			},
 		},
 	},
+	ComponentOptions: interactable.ComponentOptions{
+		Ephemeral:   true,
+		CancelDefer: true,
+	},
 	OnSelect: func(itc *interactable.InteractionContext) {
 		vals, err := itc.GetSelectValues()
 

@@ -6,8 +6,9 @@ import (
 )
 
 type Select struct {
-	Component *discord.SelectMenu
-	OnSelect  InteractionHandler
+	Component        *discord.SelectMenu
+	ComponentOptions ComponentOptions
+	OnSelect         InteractionHandler
 }
 
 func (db Select) Type() component_type.ComponentType {
@@ -20,4 +21,8 @@ func (db Select) OnInteract(itc *InteractionContext) {
 
 func (db Select) GetComponent() discord.MessageComponent {
 	return db.Component
+}
+
+func (db Select) GetComponentOptions() ComponentOptions {
+	return db.ComponentOptions
 }
