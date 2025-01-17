@@ -18,6 +18,6 @@ type Component interface {
 }
 
 type ComponentInstanceOptions struct {
-	id       string
-	disabled bool
+	ID       string
+	Disabled bool
 }
