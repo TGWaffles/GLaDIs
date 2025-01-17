@@ -31,7 +31,13 @@ func (dmm *ModalManager) RouteInteraction(itx *discord.Interaction) (discord.Int
 }
 
 func (dmm *ModalManager) Register(modal interactable.Modal) {
-	dmm.modals[modal.Modal.CustomId] = modal
+	customId := modal.Modal.CustomId
+
+	if customId == "" {
+		panic("cannot register a modal with no id")
+	}
+
+	dmm.modals[customId] = modal
 }
 
 func NewDapperModalManager() ModalManager {

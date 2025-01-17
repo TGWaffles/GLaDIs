@@ -53,11 +53,19 @@ func (dcm *ComponentManager) Register(comp interactable.Component) {
 	if comp.Type() == component_type.Button {
 		customId := comp.GetComponent().(*discord.Button).CustomId
 
+		if customId == nil {
+			panic("cannot register a component with no id")
+		}
+
 		dcm.components[*customId] = comp
 	}
 
 	if comp.Type() == component_type.StringSelect || comp.Type() == component_type.RoleSelect || comp.Type() == component_type.UserSelect || comp.Type() == component_type.MentionableSelect || comp.Type() == component_type.ChannelSelect {
 		customId := comp.GetComponent().(*discord.SelectMenu).CustomId
+
+		if customId == "" {
+			panic("cannot register a component with no id")
+		}
 
 		dcm.components[customId] = comp
 	}

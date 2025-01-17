@@ -44,6 +44,10 @@ func (dcm *CommandManager) RouteInteraction(itx *discord.Interaction) (discord.I
 }
 
 func (dcm *CommandManager) Register(command interactable.Command) {
+	if command.Command.Name == "" {
+		panic("cannot register a command with no name")
+	}
+
 	dcm.commands[command.Command.Name] = command
 }
 
