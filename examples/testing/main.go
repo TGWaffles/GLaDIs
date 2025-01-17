@@ -106,7 +106,7 @@ func main() {
 			}
 		},
 		AssociatedComponents: []interactable.Component{
-			Select,
+			&Select,
 		},
 	})
 
