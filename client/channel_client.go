@@ -85,6 +85,20 @@ func (channelClient *ChannelClient) EditMessage(messageId discord.Snowflake, edi
 	return returnedMessage, nil
 }
 
+func (channelClient *ChannelClient) DeleteMessage(messageId discord.Snowflake) error {
+	req := DiscordRequest{
+		Method:         "DELETE",
+		Endpoint:       fmt.Sprintf("/messages/%d", messageId),
+		ExpectedStatus: 204,
+	}
+
+	_, err := channelClient.MakeRequest(req)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 type ThreadType uint8
 
 type CreateThreadData struct {
