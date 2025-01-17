@@ -36,6 +36,6 @@ func (db *Select) CreateComponentInstance(opts ComponentInstanceOptions) discord
 		MinValues:    db.Component.MinValues,
 		MaxValues:    db.Component.MaxValues,
 		Disabled:     &opts.Disabled,
-		CustomId:     db.Component.CustomId + opts.ID,
+		CustomId:     db.Component.CustomId + ":" + opts.ID,
 	}
 }
