@@ -15,6 +15,9 @@ type Component interface {
 	OnInteract(itc *InteractionContext) // The OnInteract method allows us to handle a generic interaction and then further distribute it to other handlers
 	GetComponent() discord.MessageComponent
 	GetComponentOptions() ComponentOptions
-	SetContextId(id string)
-	GetContextId() *string
+}
+
+type ComponentInstanceOptions struct {
+	id       string
+	disabled bool
 }

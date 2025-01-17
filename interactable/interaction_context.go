@@ -111,6 +111,16 @@ func (ic *InteractionContext) ShowModal(modal Modal) error {
 	return nil
 }
 
+func (ic *InteractionContext) GetIdContext() *string {
+	if ic.Interaction.Type != interaction_type.MessageComponent {
+		return nil
+	}
+
+	componentData := ic.Interaction.Data.(*discord.MessageComponentData)
+
+	return helpers.GetContextFromId(componentData.CustomId)
+}
+
 func (ic *InteractionContext) GetModalTextInputValue(id string) *string {
 	if ic.Interaction.Type != interaction_type.ModalSubmit {
 		return nil

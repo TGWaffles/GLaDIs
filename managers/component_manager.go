@@ -16,9 +16,11 @@ type ComponentManager struct {
 
 func (dcm *ComponentManager) RouteInteraction(itx *discord.Interaction) (discord.InteractionResponse, error) {
 
-	commandData := itx.Data.(*discord.MessageComponentData)
+	componentData := itx.Data.(*discord.MessageComponentData)
 
-	if comp, ok := dcm.components[commandData.CustomId]; ok {
+	interactionRoute := helpers.RemoveContextIdFromString(componentData.CustomId)
+
+	if comp, ok := dcm.components[interactionRoute]; ok {
 		itc := interactable.InteractionContext{
 			Interaction:  itx,
 			DeferChannel: make(chan *discord.InteractionResponse),
@@ -46,7 +48,7 @@ func (dcm *ComponentManager) RouteInteraction(itx *discord.Interaction) (discord
 
 	}
 
-	return discord.InteractionResponse{}, fmt.Errorf("Cannot find interaction: %s", commandData.CustomId)
+	return discord.InteractionResponse{}, fmt.Errorf("Cannot find interaction: %s", componentData.CustomId)
 }
 
 func (dcm *ComponentManager) Register(comp interactable.Component) {
