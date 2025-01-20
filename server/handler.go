@@ -4,7 +4,6 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,16 +18,14 @@ import (
 
 type InteractionServerOptions struct {
 	PublicKey    ed25519.PublicKey
-	DefaultRoute string
 	DapperLogger *DapperLogger
 }
 
 var defaultConfig = InteractionServerOptions{
-	PublicKey:    ed25519.PublicKey(""),
-	DefaultRoute: "/interactions",
+	PublicKey: ed25519.PublicKey(""),
 }
 
-type InteractionServer struct {
+type InteractionHandler struct {
 	opts             InteractionServerOptions
 	commandManager   managers.CommandManager
 	componentManager managers.ComponentManager
@@ -36,7 +33,7 @@ type InteractionServer struct {
 	logger           *DapperLogger
 }
 
-func (is *InteractionServer) handle(w http.ResponseWriter, r *http.Request) {
+func (is *InteractionHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Only POST method is supported", http.StatusMethodNotAllowed)
 		is.logger.Error("Only POST method is supported")
@@ -109,11 +106,7 @@ func (is *InteractionServer) handle(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (is *InteractionServer) registerRoute() {
-	http.HandleFunc(is.opts.DefaultRoute, is.handle)
-}
-
-func (is *InteractionServer) RegisterCommand(cmd interactable.Command) {
+func (is *InteractionHandler) RegisterCommand(cmd interactable.Command) {
 	is.commandManager.Register(cmd)
 
 	for _, comp := range cmd.GetComponents() {
@@ -125,15 +118,15 @@ func (is *InteractionServer) RegisterCommand(cmd interactable.Command) {
 	}
 }
 
-func (is *InteractionServer) RegisterComponent(comp interactable.Component) {
+func (is *InteractionHandler) RegisterComponent(comp interactable.Component) {
 	is.componentManager.Register(comp)
 }
 
-func (is *InteractionServer) RegisterModal(modal interactable.Modal) {
+func (is *InteractionHandler) RegisterModal(modal interactable.Modal) {
 	is.modalManager.Register(modal)
 }
 
-func (is *InteractionServer) RegisterCommandsWithDiscord(appId discord.Snowflake, client *client.BotClient) error {
+func (is *InteractionHandler) RegisterCommandsWithDiscord(appId discord.Snowflake, client *client.BotClient) error {
 	err := is.commandManager.RegisterCommandsWithDiscord(appId, client)
 
 	if err != nil {
@@ -145,46 +138,25 @@ func (is *InteractionServer) RegisterCommandsWithDiscord(appId discord.Snowflake
 	return err
 }
 
-func (is *InteractionServer) Listen(port int) error {
-	is.registerRoute()
-
-	is.logger.Info(fmt.Sprintf("Serving Discord Interactions on http://localhost:%d\n", port))
-
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
-
-	if errors.Is(err, http.ErrServerClosed) {
-		is.logger.Error("Server closed\n")
-	} else if err != nil {
-		is.logger.Error(fmt.Sprintf("Error starting server: %s\n", err))
-	}
-
-	if err != nil {
-		is.logger.Error(fmt.Sprintf("Error starting server: %s\n", err))
-	}
-
-	return err
-}
-
-func NewInteractionServer(publicKey string) InteractionServer {
+func NewInteractionServer(publicKey string) InteractionHandler {
 	key, err := hex.DecodeString(publicKey)
 
 	if err != nil {
 		panic("Invalid public key")
 	}
 
-	return NewInteractionServerWithOptions(InteractionServerOptions{
+	return NewInteractionHandlerWithOptions(InteractionServerOptions{
 		PublicKey:    ed25519.PublicKey(key),
-		DefaultRoute: defaultConfig.DefaultRoute,
 		DapperLogger: &DefaultLogger,
 	})
 }
 
-func NewInteractionServerWithOptions(iso InteractionServerOptions) InteractionServer {
+func NewInteractionHandlerWithOptions(iso InteractionServerOptions) InteractionHandler {
 	if iso.DapperLogger == nil {
 		iso.DapperLogger = &DefaultLogger
 	}
 
-	return InteractionServer{
+	return InteractionHandler{
 		opts:             iso,
 		commandManager:   managers.NewDapperCommandManager(),
 		componentManager: managers.NewDapperComponentManager(),

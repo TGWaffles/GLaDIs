@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/JackHumphries9/dapper-go/client"
 	"github.com/JackHumphries9/dapper-go/discord"
-	"github.com/JackHumphries9/dapper-go/discord/component_type"
+	"github.com/JackHumphries9/dapper-go/discord/button_style"
 	"github.com/JackHumphries9/dapper-go/helpers"
 	"github.com/JackHumphries9/dapper-go/interactable"
 	"github.com/JackHumphries9/dapper-go/server"
@@ -38,42 +39,21 @@ func LoadJSONEnv() Env {
 	return data
 }
 
-var Select = interactable.Select{
-	Component: &discord.SelectMenu{
-		MenuType: component_type.StringSelect,
-		CustomId: "fruits",
-		Options: []discord.SelectOption{
-			{
-				Label: "Apple",
-				Value: "apple",
-			},
-			{
-				Label: "Orange",
-				Value: "orange",
-			},
-			{
-				Label: "Banana",
-				Value: "banana",
-			},
-		},
+var Button = interactable.Button{
+	Component: &discord.Button{
+		Label:    helpers.Ptr("Ya boii"),
+		CustomId: helpers.Ptr("yaboi"),
+		Style:    button_style.Primary,
 	},
-	ComponentOptions: interactable.ComponentOptions{
-		Ephemeral:   true,
-		CancelDefer: true,
-	},
-	OnSelect: func(itc *interactable.InteractionContext) {
-		vals, err := itc.GetSelectValues()
+	OnPress: func(itc *interactable.InteractionContext) {
+		itc.SetEphemeral(true)
 
-		if err != nil {
-			fmt.Printf("failed to get values")
-		}
-
-		err = itc.Respond(discord.ResponseEditData{
-			Content: helpers.Ptr(fmt.Sprintf("You chose: %s", (*vals)[0])),
+		err := itc.Respond(discord.ResponseEditData{
+			Content: helpers.Ptr("Ya boiiiiiiiii " + *itc.GetIdContext()),
 		})
 
 		if err != nil {
-			fmt.Printf("cannot respond")
+			fmt.Printf("cannot respond to message")
 		}
 	},
 }
@@ -96,21 +76,31 @@ func main() {
 		},
 		OnCommand: func(itc *interactable.InteractionContext) {
 			itc.SetEphemeral(true)
+			itc.Defer()
 
 			err = itc.Respond(discord.ResponseEditData{
-				Components: helpers.CreateActionRow(Select.Component),
+				Components: helpers.CreateActionRow(Button.CreateComponentInstance(interactable.ComponentInstanceOptions{
+					ID: "hello",
+				})),
 			})
 
 			if err != nil {
-				fmt.Printf("cannot respond to message")
+				fmt.Printf("cannot respond to message %v", err)
 			}
 		},
 		AssociatedComponents: []interactable.Component{
-			&Select,
+			&Button,
 		},
 	})
 
 	botServer.RegisterCommandsWithDiscord(appId, botClient)
 
-	botServer.Listen(3000)
+	http.HandleFunc("/", botServer.Handle)
+
+	// Start the server on port 8080
+	fmt.Println("Starting server on :3000")
+	err = http.ListenAndServe(":3000", nil)
+	if err != nil {
+		fmt.Printf("Error starting server: %v\n", err)
+	}
 }
