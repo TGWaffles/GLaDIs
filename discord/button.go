@@ -85,8 +85,8 @@ func (db *Button) CreateComponentInstance(opts ButtonInstanceOptions) MessageCom
 		Label:      db.Label,
 		Emoji:      newOpts.Emoji,
 		Url:        db.Url,
-		Disabled:   opts.Disabled,
+		Disabled:   newOpts.Disabled,
 		ButtonType: db.ButtonType,
-		CustomId:   opts.ID,
+		CustomId:   newOpts.ID,
 	}
 }
