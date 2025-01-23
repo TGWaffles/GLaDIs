@@ -137,7 +137,6 @@ func (interaction *Interaction) CreateResponseWithContext(ctx context.Context, r
 	if resp.StatusCode != 204 {
 		responseBody, err := io.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Printf("error reading HTTP response body: %v\n", err)
 			return fmt.Errorf("expected status code 204, got %d", resp.StatusCode)
 		}
 		return fmt.Errorf(

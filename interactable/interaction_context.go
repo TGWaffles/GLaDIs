@@ -75,6 +75,14 @@ func (ic *InteractionContext) Respond(msg discord.ResponseEditData) error {
 		return ic.Interaction.EditResponse(msg)
 	}
 
+	// Essencially we cannot guarentee that interactions with large payloads will be recieved on time
+	// Even though this is techincally supported, it makes more sense to defer the Interaction
+	// and provide more data at a later date
+
+	if len(msg.Attachments) > 0 {
+		return fmt.Errorf("cannot directly send attachments, defer the interaction before sending attachments")
+	}
+
 	var responseType interaction_callback_type.InteractionCallbackType
 
 	if ic.Interaction.Type == interaction_type.ApplicationCommand {

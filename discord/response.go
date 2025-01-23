@@ -138,7 +138,6 @@ func (data *ResponseEditData) BuildHTTPRequest(ctx context.Context, method strin
 		// Close the writer
 		err = writer.Close()
 		if err != nil {
-			fmt.Println("Error closing writer:", err)
 			return nil, fmt.Errorf("Failed to close writer")
 		}
 
