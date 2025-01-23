@@ -181,26 +181,11 @@ func (hook *Webhook) EditMessage(messageId string, data ResponseEditData) error 
 }
 
 func (hook *Webhook) EditMessageWithContext(ctx context.Context, messageId string, data ResponseEditData) error {
-	err := data.Verify()
-	if err != nil {
-		return fmt.Errorf("error verifying edit data: %w", err)
-	}
+	request, err := data.BuildHTTPRequest(ctx, "PATCH", hook.GetUrl()+fmt.Sprintf("/messages/%s", messageId))
 
-	body, err := json.Marshal(data)
 	if err != nil {
-		return fmt.Errorf("error marshaling data to JSON: %w", err)
+		return fmt.Errorf("error building request: %w", err)
 	}
-	var request *http.Request
-	if ctx != nil {
-		request, err = http.NewRequestWithContext(ctx, "PATCH", hook.GetUrl()+fmt.Sprintf("/messages/%s", messageId), bytes.NewReader(body))
-	} else {
-		request, err = http.NewRequest("PATCH", hook.GetUrl()+fmt.Sprintf("/messages/%s", messageId), bytes.NewReader(body))
-	}
-	if err != nil {
-		return fmt.Errorf("error creating HTTP request: %w", err)
-	}
-
-	request.Header.Set("Content-Type", "application/json")
 
 	resp, err := httpClient.Do(request)
 	if err != nil {
@@ -217,7 +202,7 @@ func (hook *Webhook) EditMessageWithContext(ctx context.Context, messageId strin
 
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("expected status code 200, got %d. Response body: %s\nRequest body: %s",
-			resp.StatusCode, string(responseBody), string(body))
+			resp.StatusCode, string(responseBody), fmt.Sprintf("%+v", data))
 	}
 
 	return nil

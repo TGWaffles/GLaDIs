@@ -8,7 +8,6 @@ import (
 
 	"github.com/JackHumphries9/dapper-go/client"
 	"github.com/JackHumphries9/dapper-go/discord"
-	"github.com/JackHumphries9/dapper-go/discord/button_style"
 	"github.com/JackHumphries9/dapper-go/helpers"
 	"github.com/JackHumphries9/dapper-go/interactable"
 	"github.com/JackHumphries9/dapper-go/server"
@@ -39,25 +38,6 @@ func LoadJSONEnv() Env {
 	return data
 }
 
-var Button = interactable.Button{
-	Component: &discord.Button{
-		Label:    helpers.Ptr("Ya boii"),
-		CustomId: helpers.Ptr("yaboi"),
-		Style:    button_style.Primary,
-	},
-	OnPress: func(itc *interactable.InteractionContext) {
-		itc.SetEphemeral(true)
-
-		err := itc.Respond(discord.ResponseEditData{
-			Content: helpers.Ptr("Ya boiiiiiiiii " + *itc.GetIdContext()),
-		})
-
-		if err != nil {
-			fmt.Printf("cannot respond to message")
-		}
-	},
-}
-
 func main() {
 	var env = LoadJSONEnv()
 
@@ -78,18 +58,30 @@ func main() {
 			itc.SetEphemeral(true)
 			itc.Defer()
 
-			err = itc.Respond(discord.ResponseEditData{
-				Components: helpers.CreateActionRow(Button.CreateComponentInstance(interactable.ComponentInstanceOptions{
-					ID: "hello",
-				})),
+			fileBytes, err := os.ReadFile("./examples/testing/test-image.png")
+			if err != nil {
+				fmt.Printf("Error reading file: %v\n", err)
+				return
+			}
+
+			err = itc.Interaction.EditResponse(discord.ResponseEditData{
+				Embeds: []discord.Embed{
+					{
+						Title:       "Hello World!",
+						Description: "Hello World!",
+						Image: &discord.EmbedImage{
+							URL: "attachment://test-image.png",
+						},
+					},
+				},
+				Attachments: []discord.MessageAttachment{
+					discord.NewBytesAttachment(fileBytes, "test-image.png", "image/png"),
+				},
 			})
 
 			if err != nil {
 				fmt.Printf("cannot respond to message %v", err)
 			}
-		},
-		AssociatedComponents: []interactable.Component{
-			&Button,
 		},
 	})
 

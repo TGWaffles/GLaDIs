@@ -1,5 +1,12 @@
 package discord
 
+type MessageAttachment interface {
+	GetBytes() []byte
+	GetFileName() string
+	GetContentType() string
+	ToDiscordAttachment(id Snowflake) Attachment
+}
+
 type Attachment struct {
 	ID          Snowflake `json:"id"`
 	Filename    string    `json:"filename"`
@@ -11,4 +18,40 @@ type Attachment struct {
 	Height      *int      `json:"height,omitempty"`
 	Width       *int      `json:"width,omitempty"`
 	Ephemeral   *bool     `json:"ephemeral,omitempty"`
+}
+
+type BytesAttachment struct {
+	bytes       []byte
+	fileName    string
+	contentType string
+}
+
+func NewBytesAttachment(data []byte, fileName string, contentType string) *BytesAttachment {
+	return &BytesAttachment{
+		bytes:       data,
+		fileName:    fileName,
+		contentType: contentType,
+	}
+}
+
+func (ba *BytesAttachment) GetBytes() []byte {
+	return ba.bytes
+}
+
+func (ba *BytesAttachment) GetFileName() string {
+	return ba.fileName
+}
+
+func (ba *BytesAttachment) GetContentType() string {
+	return ba.contentType
+}
+
+var a_desc = "A Description"
+
+func (ba *BytesAttachment) ToDiscordAttachment(id Snowflake) Attachment {
+	return Attachment{
+		Filename:    ba.fileName,
+		ContentType: &ba.contentType,
+		ID:          id,
+	}
 }
