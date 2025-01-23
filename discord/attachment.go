@@ -1,8 +1,11 @@
 package discord
 
+import "fmt"
+
 type MessageAttachment interface {
 	GetBytes() []byte
 	GetFileName() string
+	GetDiscordRef() string
 	GetContentType() string
 	ToDiscordAttachment(id Snowflake) Attachment
 }
@@ -54,4 +57,8 @@ func (ba *BytesAttachment) ToDiscordAttachment(id Snowflake) Attachment {
 		ContentType: &ba.contentType,
 		ID:          id,
 	}
+}
+
+func (ba *BytesAttachment) GetDiscordRef() string {
+	return fmt.Sprintf("attachments://%s", ba.fileName)
 }

@@ -2,6 +2,7 @@ package discord
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -57,4 +58,20 @@ func (i *Snowflake) UnmarshalText(text []byte) error {
 	}
 	*i = Snowflake(value)
 	return nil
+}
+
+func (i *Snowflake) MentionUserString() string {
+	return fmt.Sprintf("<@%d>", i)
+}
+
+func (i *Snowflake) MentionRoleString() string {
+	return fmt.Sprintf("<@&%d>.", i)
+}
+
+func (i *Snowflake) MentionChannelString() string {
+	return fmt.Sprintf("<#%d>", i)
+}
+
+func (i *Snowflake) MetionEmojiString(name string) string {
+	return fmt.Sprintf("<:%s:%d>", name, i)
 }
