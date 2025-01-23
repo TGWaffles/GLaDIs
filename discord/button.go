@@ -5,7 +5,6 @@ import (
 
 	"github.com/JackHumphries9/dapper-go/discord/button_style"
 	"github.com/JackHumphries9/dapper-go/discord/component_type"
-	"github.com/JackHumphries9/dapper-go/helpers"
 )
 
 type ButtonInstanceOptions struct {
@@ -77,7 +76,8 @@ func (db *Button) CreateComponentInstance(opts ButtonInstanceOptions) MessageCom
 		newOpts.Emoji = opts.Emoji
 	}
 	if opts.ID != nil {
-		newOpts.ID = helpers.Ptr(*db.CustomId + ":" + *opts.ID)
+		id := *db.CustomId + ":" + *opts.ID
+		newOpts.ID = &id
 	}
 
 	return &Button{
