@@ -60,5 +60,5 @@ func (ba *BytesAttachment) ToDiscordAttachment(id Snowflake) Attachment {
 }
 
 func (ba *BytesAttachment) GetDiscordRef() string {
-	return fmt.Sprintf("attachments://%s", ba.fileName)
+	return fmt.Sprintf("attachment://%s", ba.fileName)
 }

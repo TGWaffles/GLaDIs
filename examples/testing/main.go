@@ -55,15 +55,27 @@ func main() {
 			Description: helpers.Ptr("Ping Pong"),
 		},
 		OnCommand: func(itc *interactable.InteractionContext) {
-			itc.SetEphemeral(true)
+			itc.SetEphemeral(false)
 			itc.Defer()
+
+			fileBytes, err := os.ReadFile("./examples/testing/test-image.png")
+			if err != nil {
+				fmt.Printf("Error reading file: %v\n", err)
+				return
+			}
 
 			err = itc.Respond(discord.ResponseEditData{
 				Embeds: []discord.Embed{
 					{
 						Title:       "Hello World!",
 						Description: "Hello World!",
+						Image: &discord.EmbedImage{
+							URL: "attachment://test-image.png",
+						},
 					},
+				},
+				Attachments: []discord.MessageAttachment{
+					discord.NewBytesAttachment(fileBytes, "test-image.png", "image/png"),
 				},
 			})
 
