@@ -7,6 +7,13 @@ import (
 	"github.com/JackHumphries9/dapper-go/discord/component_type"
 )
 
+type ButtonInstanceOptions struct {
+	ID       *string
+	Disabled *bool
+	Style    *button_style.ButtonStyle
+	Emoji    *Emoji
+}
+
 type Button struct {
 	Style      button_style.ButtonStyle     `json:"style"`
 	Label      *string                      `json:"label,omitempty"`
@@ -48,4 +55,37 @@ func (button *Button) Verify() error {
 		}
 	}
 	return nil
+}
+
+func (db *Button) CreateComponentInstance(opts ButtonInstanceOptions) MessageComponent {
+
+	newOpts := ButtonInstanceOptions{
+		ID:       db.CustomId,
+		Disabled: db.Disabled,
+		Style:    &db.Style,
+		Emoji:    db.Emoji,
+	}
+
+	if opts.Disabled != nil {
+		newOpts.Disabled = opts.Disabled
+	}
+	if opts.Emoji != nil {
+		newOpts.Emoji = opts.Emoji
+	}
+	if opts.Emoji != nil {
+		newOpts.Emoji = opts.Emoji
+	}
+	if opts.ID != nil {
+		newOpts.ID = opts.ID
+	}
+
+	return &Button{
+		Style:      *newOpts.Style,
+		Label:      db.Label,
+		Emoji:      newOpts.Emoji,
+		Url:        db.Url,
+		Disabled:   opts.Disabled,
+		ButtonType: db.ButtonType,
+		CustomId:   newOpts.ID,
+	}
 }

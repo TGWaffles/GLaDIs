@@ -27,15 +27,17 @@ func (db Select) GetComponentOptions() ComponentOptions {
 	return db.ComponentOptions
 }
 
-func (db *Select) CreateComponentInstance(opts ComponentInstanceOptions) discord.MessageComponent {
-	return &discord.SelectMenu{
-		MenuType:     db.Component.MenuType,
-		Options:      db.Component.Options,
-		ChannelTypes: db.Component.ChannelTypes,
-		Placeholder:  db.Component.Placeholder,
-		MinValues:    db.Component.MinValues,
-		MaxValues:    db.Component.MaxValues,
-		Disabled:     &opts.Disabled,
-		CustomId:     db.Component.CustomId + ":" + opts.ID,
-	}
-}
+// TODO: Re add this but implement it at a lower level
+
+// func (db *Select) CreateComponentInstance(opts ComponentInstanceOptions) discord.MessageComponent {
+// 	return &discord.SelectMenu{
+// 		MenuType:     db.Component.MenuType,
+// 		Options:      db.Component.Options,
+// 		ChannelTypes: db.Component.ChannelTypes,
+// 		Placeholder:  db.Component.Placeholder,
+// 		MinValues:    db.Component.MinValues,
+// 		MaxValues:    db.Component.MaxValues,
+// 		Disabled:     &opts.Disabled,
+// 		CustomId:     db.Component.CustomId + ":" + opts.ID,
+// 	}
+// }

@@ -16,8 +16,3 @@ type Component interface {
 	GetComponent() discord.MessageComponent
 	GetComponentOptions() ComponentOptions
 }
-
-type ComponentInstanceOptions struct {
-	ID       string
-	Disabled bool
-}
