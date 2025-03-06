@@ -60,18 +60,18 @@ func (i *Snowflake) UnmarshalText(text []byte) error {
 	return nil
 }
 
-func (i *Snowflake) MentionUserString() string {
-	return fmt.Sprintf("<@%d>", uint64(*i))
+func (i Snowflake) MentionUserString() string {
+	return fmt.Sprintf("<@%d>", uint64(i))
 }
 
-func (i *Snowflake) MentionRoleString() string {
-	return fmt.Sprintf("<@&%d>.", uint64(*i))
+func (i Snowflake) MentionRoleString() string {
+	return fmt.Sprintf("<@&%d>.", uint64(i))
 }
 
-func (i *Snowflake) MentionChannelString() string {
-	return fmt.Sprintf("<#%d>", uint64(*i))
+func (i Snowflake) MentionChannelString() string {
+	return fmt.Sprintf("<#%d>", uint64(i))
 }
 
-func (i *Snowflake) MetionEmojiString(name string) string {
-	return fmt.Sprintf("<:%s:%d>", name, uint64(*i))
+func (i Snowflake) MetionEmojiString(name string) string {
+	return fmt.Sprintf("<:%s:%d>", name, uint64(i))
 }

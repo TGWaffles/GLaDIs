@@ -151,7 +151,7 @@ func (ic *InteractionContext) GetModalTextInputValue(id string) *string {
 	return nil
 }
 
-func (ic *InteractionContext) GetSelectValues() (*[]string, error) {
+func (ic *InteractionContext) GetSelectValues() ([]string, error) {
 	if ic.Interaction.Type != interaction_type.MessageComponent {
 		return nil, fmt.Errorf("cannot get command options from a non command interaction")
 	}
@@ -162,7 +162,7 @@ func (ic *InteractionContext) GetSelectValues() (*[]string, error) {
 		return nil, fmt.Errorf("cannot convert to values")
 	}
 
-	return &selMenu.Values, nil
+	return selMenu.Values, nil
 
 }
 
