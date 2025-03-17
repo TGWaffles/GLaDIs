@@ -110,20 +110,20 @@ func (is *InteractionHandler) RegisterCommand(cmd interactable.Command) {
 	is.commandManager.Register(cmd)
 
 	for _, comp := range cmd.GetComponents() {
-		is.componentManager.Register(comp)
+		is.componentManager.Register(comp, cmd.Command.Name)
 	}
 
 	for _, modal := range cmd.GetModals() {
-		is.modalManager.Register(modal)
+		is.modalManager.Register(modal, cmd.Command.Name)
 	}
 }
 
 func (is *InteractionHandler) RegisterComponent(comp interactable.Component) {
-	is.componentManager.Register(comp)
+	is.componentManager.Register(comp, "")
 }
 
 func (is *InteractionHandler) RegisterModal(modal interactable.Modal) {
-	is.modalManager.Register(modal)
+	is.modalManager.Register(modal, "")
 }
 
 func (is *InteractionHandler) RegisterCommandsWithDiscord(appId discord.Snowflake, client *client.BotClient) error {

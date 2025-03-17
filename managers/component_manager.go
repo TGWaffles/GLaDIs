@@ -51,7 +51,7 @@ func (dcm *ComponentManager) RouteInteraction(itx *discord.Interaction) (discord
 	return discord.InteractionResponse{}, fmt.Errorf("Cannot find interaction: %s", componentData.CustomId)
 }
 
-func (dcm *ComponentManager) Register(comp interactable.Component) {
+func (dcm *ComponentManager) Register(comp interactable.Component, prefix string) {
 	if comp.Type() == component_type.Button {
 		customId := comp.GetComponent().(*discord.Button).CustomId
 
@@ -59,7 +59,9 @@ func (dcm *ComponentManager) Register(comp interactable.Component) {
 			panic("cannot register a component with no id")
 		}
 
-		dcm.components[*customId] = comp
+		id := prefix + "." + *customId
+
+		dcm.components[id] = comp
 	}
 
 	if comp.Type() == component_type.StringSelect || comp.Type() == component_type.RoleSelect || comp.Type() == component_type.UserSelect || comp.Type() == component_type.MentionableSelect || comp.Type() == component_type.ChannelSelect {
@@ -69,7 +71,9 @@ func (dcm *ComponentManager) Register(comp interactable.Component) {
 			panic("cannot register a component with no id")
 		}
 
-		dcm.components[customId] = comp
+		id := prefix + "." + customId
+
+		dcm.components[id] = comp
 	}
 }
 
