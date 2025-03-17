@@ -28,5 +28,5 @@ func (db Button) GetComponentOptions() ComponentOptions {
 }
 
 func (db *Button) CreateButtonInstance(opts discord.ButtonInstanceOptions) discord.MessageComponent {
-	return db.CreateButtonInstance(opts)
+	return db.Component.CreateComponentInstance(opts)
 }
