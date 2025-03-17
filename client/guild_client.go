@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/JackHumphries9/dapper-go/discord"
+	"github.com/tgwaffles/gladis/discord"
 )
 
 type GuildClient struct {

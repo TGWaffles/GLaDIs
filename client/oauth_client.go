@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/JackHumphries9/dapper-go/client/errors"
-	"github.com/JackHumphries9/dapper-go/discord/oauth_scopes"
+	"github.com/tgwaffles/gladis/client/errors"
+	"github.com/tgwaffles/gladis/discord/oauth_scopes"
 )
 
 const DiscordAuthorizationUrl = "https://discordapp.com/api/oauth2/authorize"

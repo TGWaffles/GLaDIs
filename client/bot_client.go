@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/JackHumphries9/dapper-go/client/errors"
-	"github.com/JackHumphries9/dapper-go/discord"
+	"github.com/tgwaffles/gladis/client/errors"
+	"github.com/tgwaffles/gladis/discord"
 )
 
 type BotClient struct {

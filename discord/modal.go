@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/JackHumphries9/dapper-go/discord/component_type"
-	"github.com/JackHumphries9/dapper-go/discord/text_input_style"
+	"github.com/tgwaffles/gladis/discord/component_type"
+	"github.com/tgwaffles/gladis/discord/text_input_style"
 )
 
 type ModalSubmitData struct {

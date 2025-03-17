@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/JackHumphries9/dapper-go/discord"
+	"github.com/tgwaffles/gladis/discord"
 )
 
 type UserClient struct {

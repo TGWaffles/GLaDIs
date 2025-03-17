@@ -8,7 +8,7 @@ import (
 	"mime/multipart"
 	"net/http"
 
-	"github.com/JackHumphries9/dapper-go/discord/interaction_callback_type"
+	"github.com/tgwaffles/gladis/discord/interaction_callback_type"
 )
 
 type InteractionResponse struct {

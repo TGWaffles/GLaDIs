@@ -1,6 +1,6 @@
 package helpers
 
-import "github.com/JackHumphries9/dapper-go/discord"
+import "github.com/tgwaffles/gladis/discord"
 
 func CreateActionRow(comps ...discord.MessageComponent) []discord.MessageComponent {
 	return []discord.MessageComponent{

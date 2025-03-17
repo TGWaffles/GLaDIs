@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/JackHumphries9/dapper-go/discord/allowed_mention_type"
+	"github.com/tgwaffles/gladis/discord/allowed_mention_type"
 )
 
 type ErrTooManyComponents struct {

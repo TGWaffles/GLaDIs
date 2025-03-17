@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/JackHumphries9/dapper-go/helpers/time_type"
+	"github.com/tgwaffles/gladis/helpers/time_type"
 )
 
 type TimestampOptions struct {

@@ -3,7 +3,7 @@ package discord
 import (
 	"encoding/json"
 
-	"github.com/JackHumphries9/dapper-go/discord/component_type"
+	"github.com/tgwaffles/gladis/discord/component_type"
 )
 
 type MessageComponentWrapper struct {

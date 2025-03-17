@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/JackHumphries9/dapper-go/discord"
-	"github.com/JackHumphries9/dapper-go/discord/interaction_context_type"
+	"github.com/tgwaffles/gladis/discord"
+	"github.com/tgwaffles/gladis/discord/interaction_context_type"
 )
 
 type ApplicationClient struct {

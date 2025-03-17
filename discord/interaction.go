@@ -8,9 +8,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/JackHumphries9/dapper-go/discord/interaction_callback_type"
-	"github.com/JackHumphries9/dapper-go/discord/interaction_context_type"
-	"github.com/JackHumphries9/dapper-go/discord/interaction_type"
+	"github.com/tgwaffles/gladis/discord/interaction_callback_type"
+	"github.com/tgwaffles/gladis/discord/interaction_context_type"
+	"github.com/tgwaffles/gladis/discord/interaction_type"
 )
 
 type Interaction struct {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func PrintStructAsJSON(s interface{}) {
+func PrintStructAsJSON(s any) {
 	st, err := json.MarshalIndent(s, "", "  ")
 
 	if err != nil {

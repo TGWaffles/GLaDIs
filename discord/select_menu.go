@@ -1,8 +1,8 @@
 package discord
 
 import (
-	"github.com/JackHumphries9/dapper-go/discord/channel_type"
-	"github.com/JackHumphries9/dapper-go/discord/component_type"
+	"github.com/tgwaffles/gladis/discord/channel_type"
+	"github.com/tgwaffles/gladis/discord/component_type"
 )
 
 type SelectMenu struct {

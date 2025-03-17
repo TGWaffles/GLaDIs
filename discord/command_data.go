@@ -1,6 +1,6 @@
 package discord
 
-import "github.com/JackHumphries9/dapper-go/discord/command_type"
+import "github.com/tgwaffles/gladis/discord/command_type"
 
 type ApplicationCommandData struct {
 	Id        Snowflake                           `json:"id"`

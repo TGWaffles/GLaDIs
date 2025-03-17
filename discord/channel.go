@@ -3,7 +3,7 @@ package discord
 import (
 	"time"
 
-	"github.com/JackHumphries9/dapper-go/discord/channel_type"
+	"github.com/tgwaffles/gladis/discord/channel_type"
 )
 
 type Channel struct {

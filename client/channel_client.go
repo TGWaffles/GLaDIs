@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/JackHumphries9/dapper-go/discord"
-	"github.com/JackHumphries9/dapper-go/discord/channel_type"
+	"github.com/tgwaffles/gladis/discord"
+	"github.com/tgwaffles/gladis/discord/channel_type"
 )
 
 type ChannelClient struct {
