@@ -1,14 +1,14 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/JackHumphries9/dapper-go">
-    <img src="./docs/static/img/dapper-icon.png" alt="Logo" width="80" height="80" style="border-radius: 25px">
+  <a href="https://github.com/TGWaffles/GLaDIs">
+    <img src="./logo.png" alt="Logo" width="80" height="80" style="border-radius: 25px">
   </a>
 
-<h3 align="center">Dapper Go</h3>
+<h3 align="center">GLaDIs</h3>
 
   <p align="center">
-      Discord Application Wrapper for Go (HTTP Only)
+    Golang Lambda Discord Interactions
   </p>
 </p>
 
@@ -26,12 +26,12 @@
 <!-- ABOUT THE PROJECT -->
 
 ## About The Project
-Dapper provides a simple and intuative API for making Discord interaction applications. It is built on top of the GLaDIs library, which provides a simple way to interact with the Discord API.
+Discord interactions support on AWS lambda, for Golang.
 
 ### Built With
 
 -   [Go](https://go.dev)
--   [GLaDIs](https://github.com/TGWaffles/GLaDIs)
+-   [AWS SDK Go](https://github.com/aws/aws-sdk-go)
 
 
 ## Getting Started
@@ -41,12 +41,12 @@ To get a local copy up and running follow these simple steps.
 Install the package in your Go project:
 
 ```sh
-go get github.com/JackHumphries9/dapper-go
+go get github.com/TGWaffles/GLaDIs
 ```
 
 ## Releases
 
-See the [releases](https://github.com/JackHumphries9/dapper-go/releases/) page for all releases/tags.
+See the [releases](https://github.com/TGWaffles/GLaDIs/releases/) page for all releases and to download the binaries.
 
 ## Contributing
 
@@ -64,4 +64,4 @@ Distributed under the GNU General Public License v3.0 License. See `LICENSE` for
 
 ## Contact
 
-Jack Humphries - [Email](mailto:jack@jackh.club)
+TGWaffles 
