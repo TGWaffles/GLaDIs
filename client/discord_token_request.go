@@ -1,8 +1,9 @@
 package client
 
 import (
-	"github.com/tgwaffles/gladis/discord/oauth_scopes"
 	"net/url"
+
+	"github.com/tgwaffles/gladis/discord/oauth_scopes"
 )
 
 type TokenGrantType string

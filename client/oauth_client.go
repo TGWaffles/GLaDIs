@@ -69,7 +69,7 @@ func NewOAuthClient(clientId string, clientSecret string, redirectUri string) *O
 }
 
 func (oauthClient *OAuthClient) BuildAuthorizationURL(scopes []oauth_scopes.OAuthScope, state string) string {
-	return DiscordAuthorizationUrl + "?" + 
+	return DiscordAuthorizationUrl + "?" +
 		"client_id=" + oauthClient.ClientId + "&" +
 		"redirect_uri=" + url.QueryEscape(oauthClient.redirectUri) + "&" +
 		"response_type=code&" +

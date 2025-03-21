@@ -1,37 +1,50 @@
 package verification
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"encoding/hex"
-	"fmt"
-	"github.com/aws/aws-lambda-go/events"
+	"io"
+	"net/http"
 )
 
-func VerifyRequest(publicKey string, request events.APIGatewayProxyRequest) bool {
-	key, err := hex.DecodeString(publicKey)
+func Verify(r *http.Request, key ed25519.PublicKey) bool {
+	var msg bytes.Buffer
+
+	signature := r.Header.Get("X-Signature-Ed25519")
+	if signature == "" {
+		return false
+	}
+
+	sig, err := hex.DecodeString(signature)
 	if err != nil {
-		fmt.Println("Failed to decode public key")
 		return false
 	}
 
-	signatureAsString := request.Headers["x-signature-ed25519"]
-
-	if len(signatureAsString) == 0 {
-		fmt.Println("Missing signature")
+	if len(sig) != ed25519.SignatureSize || sig[63]&224 != 0 {
 		return false
 	}
 
-	signature, err := hex.DecodeString(signatureAsString)
+	timestamp := r.Header.Get("X-Signature-Timestamp")
+	if timestamp == "" {
+		return false
+	}
+
+	msg.WriteString(timestamp)
+
+	defer r.Body.Close()
+	var body bytes.Buffer
+
+	// at the end of the function, copy the original body back into the request
+	defer func() {
+		r.Body = io.NopCloser(&body)
+	}()
+
+	// copy body into buffers
+	_, err = io.Copy(&msg, io.TeeReader(r.Body, &body))
 	if err != nil {
-		fmt.Println("Failed to decode signature")
 		return false
 	}
-	timestamp := request.Headers["x-signature-timestamp"]
-	if len(timestamp) == 0 {
-		fmt.Println("Missing timestamp")
-		return false
-	}
-	body := request.Body
 
-	return ed25519.Verify(key, []byte(timestamp+body), signature)
+	return ed25519.Verify(key, msg.Bytes(), sig)
 }

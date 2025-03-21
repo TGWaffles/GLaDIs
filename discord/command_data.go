@@ -7,19 +7,19 @@ type ApplicationCommandData struct {
 	Name      string                              `json:"name"`
 	Type      command_type.ApplicationCommandType `json:"type"`
 	Resolved  *ResolvedData                       `json:"resolved,omitempty"`
-	Options   []ApplicationCommandOption          `json:"options,omitempty"`
+	Options   []ApplicationCommandDataOption      `json:"options,omitempty"`
 	GuildId   *Snowflake                          `json:"guild_id,omitempty"`
 	TargetId  *Snowflake                          `json:"target_id,omitempty"`
-	optionMap map[string]ApplicationCommandOption
+	optionMap map[string]ApplicationCommandDataOption
 }
 
-func (commandData *ApplicationCommandData) GetOption(optionName string) *ApplicationCommandOption {
+func (commandData *ApplicationCommandData) GetOption(optionName string) *ApplicationCommandDataOption {
 	if commandData.Options == nil || len(commandData.Options) == 0 {
 		return nil
 	}
 
 	if commandData.optionMap == nil {
-		commandData.optionMap = make(map[string]ApplicationCommandOption)
+		commandData.optionMap = make(map[string]ApplicationCommandDataOption)
 		for _, option := range commandData.Options {
 			commandData.optionMap[option.Name] = option
 		}

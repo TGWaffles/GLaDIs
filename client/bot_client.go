@@ -4,11 +4,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/tgwaffles/gladis/client/errors"
-	"github.com/tgwaffles/gladis/discord"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/tgwaffles/gladis/client/errors"
+	"github.com/tgwaffles/gladis/discord"
 )
 
 type BotClient struct {
@@ -24,7 +25,7 @@ func NewBot(token string) *BotClient {
 }
 
 func getUserAgent() string {
-	return "DiscordBot (https://github.com/TGWaffles/GLaDIs, v0.2) Interactions HTTP Client"
+	return "DiscordBot (https://github.com/JackHumphries9/dapper-go, v1.0) Interactions HTTP Client"
 }
 
 func (botClient *BotClient) MakeRequest(discordRequest DiscordRequest) (response *http.Response, err error) {
@@ -90,6 +91,13 @@ func (botClient *BotClient) GetUserClient(userId discord.Snowflake) *UserClient 
 	return &UserClient{
 		UserId: userId,
 		Bot:    botClient,
+	}
+}
+
+func (botClient *BotClient) GetApplicationClient(appId discord.Snowflake) *ApplicationClient {
+	return &ApplicationClient{
+		ApplicationId: appId,
+		Bot:           botClient,
 	}
 }
 

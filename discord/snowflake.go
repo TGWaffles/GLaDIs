@@ -2,13 +2,14 @@ package discord
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 )
 
 type Snowflake uint64
 
-func GetSnowflake(id interface{}) (Snowflake, error) {
+func GetSnowflake(id any) (Snowflake, error) {
 	switch id.(type) {
 	case string:
 		res, err := strconv.ParseInt(id.(string), 10, 64)
@@ -57,4 +58,20 @@ func (i *Snowflake) UnmarshalText(text []byte) error {
 	}
 	*i = Snowflake(value)
 	return nil
+}
+
+func (i Snowflake) MentionUserString() string {
+	return fmt.Sprintf("<@%d>", uint64(i))
+}
+
+func (i Snowflake) MentionRoleString() string {
+	return fmt.Sprintf("<@&%d>.", uint64(i))
+}
+
+func (i Snowflake) MentionChannelString() string {
+	return fmt.Sprintf("<#%d>", uint64(i))
+}
+
+func (i Snowflake) MetionEmojiString(name string) string {
+	return fmt.Sprintf("<:%s:%d>", name, uint64(i))
 }

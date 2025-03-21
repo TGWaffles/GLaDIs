@@ -3,8 +3,9 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tgwaffles/gladis/discord"
 	"net/http"
+
+	"github.com/tgwaffles/gladis/discord"
 )
 
 type UserClient struct {

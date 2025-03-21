@@ -5,30 +5,33 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/tgwaffles/gladis/discord/interaction_callback_type"
-	"github.com/tgwaffles/gladis/discord/interaction_type"
-	"io/ioutil"
+	"io"
 	"net/http"
+
+	"github.com/tgwaffles/gladis/discord/interaction_callback_type"
+	"github.com/tgwaffles/gladis/discord/interaction_context_type"
+	"github.com/tgwaffles/gladis/discord/interaction_type"
 )
 
 type Interaction struct {
-	Id             Snowflake                        `json:"id"`
-	ApplicationId  Snowflake                        `json:"application_id"`
-	Type           interaction_type.InteractionType `json:"type"`
-	DataInternal   *json.RawMessage                 `json:"data,omitempty"`
-	Data           InteractionData                  `json:"-"`
-	GuildId        *Snowflake                       `json:"guild_id,omitempty"`
-	Channel        *Channel                         `json:"channel,omitempty"`
-	ChannelId      *Snowflake                       `json:"channel_id,omitempty"`
-	Member         *Member                          `json:"member,omitempty"`
-	User           *User                            `json:"user,omitempty"`
-	Token          string                           `json:"token"`
-	Version        int                              `json:"version"`
-	Message        *Message                         `json:"message,omitempty"`
-	AppPermissions *Permissions                     `json:"permissions,omitempty"`
-	Locale         string                           `json:"locale"`
-	GuildLocale    string                           `json:"guild_locale"`
-	hook           *Webhook                         // Used for responding to the interaction
+	Id             Snowflake                                        `json:"id"`
+	ApplicationId  Snowflake                                        `json:"application_id"`
+	Type           interaction_type.InteractionType                 `json:"type"`
+	DataInternal   *json.RawMessage                                 `json:"data,omitempty"`
+	Data           InteractionData                                  `json:"-"`
+	GuildId        *Snowflake                                       `json:"guild_id,omitempty"`
+	Channel        *Channel                                         `json:"channel,omitempty"`
+	ChannelId      *Snowflake                                       `json:"channel_id,omitempty"`
+	Member         *Member                                          `json:"member,omitempty"`
+	User           *User                                            `json:"user,omitempty"`
+	Token          string                                           `json:"token"`
+	Version        int                                              `json:"version"`
+	Message        *Message                                         `json:"message,omitempty"`
+	AppPermissions *Permissions                                     `json:"permissions,omitempty"`
+	Locale         string                                           `json:"locale"`
+	GuildLocale    string                                           `json:"guild_locale"`
+	hook           *Webhook                                         // Used for responding to the interaction
+	Context        *interaction_context_type.InteractionContextType `json:"context,omitempty"`
 }
 
 type InteractionData interface {
@@ -132,9 +135,8 @@ func (interaction *Interaction) CreateResponseWithContext(ctx context.Context, r
 	}
 
 	if resp.StatusCode != 204 {
-		responseBody, err := ioutil.ReadAll(resp.Body)
+		responseBody, err := io.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Printf("error reading HTTP response body: %v\n", err)
 			return fmt.Errorf("expected status code 204, got %d", resp.StatusCode)
 		}
 		return fmt.Errorf(

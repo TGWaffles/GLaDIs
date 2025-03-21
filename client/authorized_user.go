@@ -1,9 +1,10 @@
 package client
 
 import (
+	"net/http"
+
 	"github.com/tgwaffles/gladis/discord"
 	"github.com/tgwaffles/gladis/discord/oauth_scopes"
-	"net/http"
 )
 
 type AuthorizedUser struct {

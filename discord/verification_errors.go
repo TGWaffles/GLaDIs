@@ -3,6 +3,7 @@ package discord
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/tgwaffles/gladis/discord/allowed_mention_type"
 )
 

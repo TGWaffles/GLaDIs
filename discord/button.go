@@ -2,9 +2,17 @@ package discord
 
 import (
 	"encoding/json"
+
 	"github.com/tgwaffles/gladis/discord/button_style"
 	"github.com/tgwaffles/gladis/discord/component_type"
 )
+
+type ButtonInstanceOptions struct {
+	ID       *string
+	Disabled *bool
+	Style    *button_style.ButtonStyle
+	Emoji    *Emoji
+}
 
 type Button struct {
 	Style      button_style.ButtonStyle     `json:"style"`
@@ -47,4 +55,38 @@ func (button *Button) Verify() error {
 		}
 	}
 	return nil
+}
+
+func (db *Button) CreateComponentInstance(opts ButtonInstanceOptions) MessageComponent {
+
+	newOpts := ButtonInstanceOptions{
+		ID:       db.CustomId,
+		Disabled: db.Disabled,
+		Style:    &db.Style,
+		Emoji:    db.Emoji,
+	}
+
+	if opts.Disabled != nil {
+		newOpts.Disabled = opts.Disabled
+	}
+	if opts.Emoji != nil {
+		newOpts.Emoji = opts.Emoji
+	}
+	if opts.Emoji != nil {
+		newOpts.Emoji = opts.Emoji
+	}
+	if opts.ID != nil {
+		id := *db.CustomId + ":" + *opts.ID
+		newOpts.ID = &id
+	}
+
+	return &Button{
+		Style:      *newOpts.Style,
+		Label:      db.Label,
+		Emoji:      newOpts.Emoji,
+		Url:        db.Url,
+		Disabled:   newOpts.Disabled,
+		ButtonType: db.ButtonType,
+		CustomId:   newOpts.ID,
+	}
 }
