@@ -6,6 +6,7 @@ const (
 	Success
 	Danger
 	Link
+	Premium
 )
 
 type ButtonStyle uint8

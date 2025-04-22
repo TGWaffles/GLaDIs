@@ -37,11 +37,11 @@ func (e ErrNestedActionRow) Error() string {
 	return fmt.Sprintf("nested ActionRow in ActionRow\nComponents:%s\n", componentsText)
 }
 
-type ErrLinkButtonCannotHaveCustomId struct {
+type ErrButtonCannotHaveCustomId struct {
 	Component *Button
 }
 
-func (e ErrLinkButtonCannotHaveCustomId) Error() string {
+func (e ErrButtonCannotHaveCustomId) Error() string {
 	var componentText string
 	componentMarshalled, err := json.Marshal(e.Component)
 	if err != nil {
@@ -49,7 +49,22 @@ func (e ErrLinkButtonCannotHaveCustomId) Error() string {
 	} else {
 		componentText = string(componentMarshalled)
 	}
-	return fmt.Sprintf("link button cannot have custom id\nComponent:%s\n", componentText)
+	return fmt.Sprintf("button cannot have custom id\nComponent:%s\n", componentText)
+}
+
+type ErrButtonCannotHaveSKUId struct {
+	Component *Button
+}
+
+func (e ErrButtonCannotHaveSKUId) Error() string {
+	var componentText string
+	componentMarshalled, err := json.Marshal(e.Component)
+	if err != nil {
+		componentText = fmt.Sprintf("%v", e.Component)
+	} else {
+		componentText = string(componentMarshalled)
+	}
+	return fmt.Sprintf("button cannot have sku id\nComponent:%s\n", componentText)
 }
 
 type ErrLinkButtonMustHaveUrl struct {
@@ -65,6 +80,21 @@ func (e ErrLinkButtonMustHaveUrl) Error() string {
 		componentText = string(componentMarshalled)
 	}
 	return fmt.Sprintf("link button must have url\nComponent:%s\n", componentText)
+}
+
+type ErrPremiumButtonMustHaveSKUId struct {
+	Component *Button
+}
+
+func (e ErrPremiumButtonMustHaveSKUId) Error() string {
+	var componentText string
+	componentMarshalled, err := json.Marshal(e.Component)
+	if err != nil {
+		componentText = fmt.Sprintf("%v", e.Component)
+	} else {
+		componentText = string(componentMarshalled)
+	}
+	return fmt.Sprintf("premium button must have sku\nComponent:%s\n", componentText)
 }
 
 type ErrNonLinkButtonCannotHaveUrl struct {

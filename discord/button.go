@@ -15,6 +15,7 @@ type Button struct {
 	Url        *string                      `json:"url,omitempty"`
 	Disabled   *bool                        `json:"disabled,omitempty"`
 	ButtonType component_type.ComponentType `json:"type"`
+	SKUId      *Snowflake                   `json:"sku_id"`
 }
 
 func (button Button) MarshalJSON() ([]byte, error) {
@@ -34,10 +35,23 @@ func (button *Button) Type() component_type.ComponentType {
 func (button *Button) Verify() error {
 	if button.Style == button_style.Link {
 		if button.CustomId != nil {
-			return ErrLinkButtonCannotHaveCustomId{button}
+			return ErrButtonCannotHaveCustomId{button}
+		}
+		if button.SKUId != nil {
+			return ErrButtonCannotHaveSKUId{button}
 		}
 		if button.Url == nil {
 			return ErrLinkButtonMustHaveUrl{button}
+		}
+	} else if button.Style == button_style.Premium {
+		if button.CustomId != nil {
+			return ErrButtonCannotHaveCustomId{button}
+		}
+		if button.Url != nil {
+			return ErrNonLinkButtonCannotHaveUrl{button}
+		}
+		if button.SKUId == nil {
+			return ErrPremiumButtonMustHaveSKUId{button}
 		}
 	} else {
 		if button.Url != nil {
@@ -45,6 +59,9 @@ func (button *Button) Verify() error {
 		}
 		if button.CustomId == nil {
 			return ErrComponentMustHaveCustomId{button}
+		}
+		if button.SKUId != nil {
+			return ErrButtonCannotHaveSKUId{button}
 		}
 	}
 	return nil
