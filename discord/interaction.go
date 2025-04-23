@@ -20,6 +20,7 @@ type Interaction struct {
 	DataInternal   *json.RawMessage                                 `json:"data,omitempty"`
 	Data           InteractionData                                  `json:"-"`
 	GuildId        *Snowflake                                       `json:"guild_id,omitempty"`
+	Guild          *Guild                                           `json:"guild,omitempty"`
 	Channel        *Channel                                         `json:"channel,omitempty"`
 	ChannelId      *Snowflake                                       `json:"channel_id,omitempty"`
 	Member         *Member                                          `json:"member,omitempty"`
