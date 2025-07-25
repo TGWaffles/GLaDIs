@@ -22,7 +22,6 @@ type InteractionCallbackData interface {
 type MessageResponse interface {
 	GetMessageAttachments() []MessageAttachment
 	SetDiscordAttachments([]Attachment)
-	ToJson() ([]byte, error)
 }
 
 func ensureMessageAttachments(response MessageResponse) {
@@ -55,10 +54,6 @@ func (data *MessageCallbackData) SetDiscordAttachments(attachments []Attachment)
 	data.DiscordAttachments = attachments
 }
 
-func (data *MessageCallbackData) ToJson() ([]byte, error) {
-	return json.Marshal(*data)
-}
-
 type ResponseEditData struct {
 	Content            *string             `json:"content,omitempty"`
 	Embeds             []Embed             `json:"embeds,omitempty"`
@@ -74,10 +69,6 @@ func (data *ResponseEditData) GetMessageAttachments() []MessageAttachment {
 
 func (data *ResponseEditData) SetDiscordAttachments(attachments []Attachment) {
 	data.DiscordAttachments = attachments
-}
-
-func (data *ResponseEditData) ToJson() ([]byte, error) {
-	return json.Marshal(*data)
 }
 
 func (data ResponseEditData) Verify() error {
@@ -165,7 +156,7 @@ func (ir InteractionResponse) ToHttpResponse() HTTPResponse {
 			// It has attachments
 			var buffer bytes.Buffer
 			var contentType string
-			contentType, err = WriteFormResponse(&buffer, messageResponse)
+			contentType, err = WriteFormResponse(&buffer, data, messageResponse.GetMessageAttachments())
 			if err != nil {
 				fmt.Println("Error writing form response:", err)
 				return HTTPResponse{
@@ -190,12 +181,7 @@ func (ir InteractionResponse) ToHttpResponse() HTTPResponse {
 	}
 }
 
-func WriteFormResponse(bodyWriter io.Writer, response MessageResponse) (contentType string, err error) {
-	ensureMessageAttachments(response)
-	body, err := response.ToJson()
-	if err != nil {
-		return "", fmt.Errorf("error marshalling response to JSON: %w", err)
-	}
+func WriteFormResponse(bodyWriter io.Writer, responseJson []byte, attachments []MessageAttachment) (contentType string, err error) {
 
 	writer := multipart.NewWriter(bodyWriter)
 
@@ -210,14 +196,14 @@ func WriteFormResponse(bodyWriter io.Writer, response MessageResponse) (contentT
 		fmt.Println("Error creating JSON field:", err)
 		return "", fmt.Errorf("error creating JSON field")
 	}
-	_, err = mainMessagePart.Write(body)
+	_, err = mainMessagePart.Write(responseJson)
 	if err != nil {
 		fmt.Println("Error writing JSON field:", err)
 		return "", fmt.Errorf("error writing JSON field")
 	}
 
 	// Write attachments
-	for i, attachment := range response.GetMessageAttachments() {
+	for i, attachment := range attachments {
 		attachmentPartHeaders := make(map[string][]string)
 		attachmentPartHeaders["Content-Disposition"] = []string{fmt.Sprintf(`form-data; name="files[%d]"; filename="%s"`, i, attachment.GetFileName())}
 		attachmentPartHeaders["Content-Type"] = []string{attachment.GetContentType()}
