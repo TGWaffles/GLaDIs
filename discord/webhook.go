@@ -181,11 +181,21 @@ func (hook *Webhook) EditMessage(messageId string, data ResponseEditData) error 
 }
 
 func (hook *Webhook) EditMessageWithContext(ctx context.Context, messageId string, data ResponseEditData) error {
-	request, err := data.BuildHTTPRequest(ctx, "PATCH", hook.GetUrl()+fmt.Sprintf("/messages/%s", messageId))
-
+	body, contentType, err := ConvertDataToBodyBytes(data)
 	if err != nil {
-		return fmt.Errorf("error building request: %w", err)
+		return fmt.Errorf("error converting data to body bytes: %w", err)
 	}
+	url := hook.GetUrl() + fmt.Sprintf("/messages/%s", messageId)
+	var request *http.Request
+	if ctx != nil {
+		request, err = http.NewRequestWithContext(ctx, "PATCH", url, bytes.NewReader(body))
+	} else {
+		request, err = http.NewRequest("PATCH", url, bytes.NewReader(body))
+	}
+	if err != nil {
+		return fmt.Errorf("error creating HTTP request: %w", err)
+	}
+	request.Header.Set("Content-Type", contentType)
 
 	resp, err := httpClient.Do(request)
 	if err != nil {
