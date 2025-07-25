@@ -2,9 +2,9 @@ package discord
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"mime/multipart"
 	"net/http"
 
@@ -16,158 +16,68 @@ type InteractionResponse struct {
 	Data InteractionCallbackData                           `json:"data,omitempty"`
 }
 
-type HTTPResponse struct {
-	StatusCode uint
-	Body       string
-	Headers    map[string]string
-}
-
-func (res HTTPResponse) WriteResponse(w http.ResponseWriter) {
-	w.WriteHeader(int(res.StatusCode))
-
-	for key, val := range res.Headers {
-		w.Header().Add(key, val)
-	}
-
-	if res.Body != "" {
-		fmt.Fprint(w, res.Body)
-	}
-}
-
-func (ir InteractionResponse) ToHttpResponse() HTTPResponse {
-	data, err := json.Marshal(ir)
-	if err != nil {
-		fmt.Println("Error marshalling interaction response:", err)
-		return HTTPResponse{
-			StatusCode: 500,
-		}
-	}
-	return HTTPResponse{
-		StatusCode: 200,
-		Body:       string(data),
-		Headers: map[string]string{
-			"Content-Type": "application/json",
-		},
-	}
-}
-
 type InteractionCallbackData interface {
 }
 
+type MessageResponse interface {
+	GetMessageAttachments() []MessageAttachment
+	SetDiscordAttachments([]Attachment)
+	ToJson() ([]byte, error)
+}
+
+func ensureMessageAttachments(response MessageResponse) {
+	existingAttachments := response.GetMessageAttachments()
+	discordAttachments := make([]Attachment, 0, len(existingAttachments))
+
+	for i, attachment := range existingAttachments {
+		discordAttachments = append(discordAttachments, attachment.ToDiscordAttachment(Snowflake(i)))
+	}
+
+	response.SetDiscordAttachments(discordAttachments)
+}
+
 type MessageCallbackData struct {
-	TTS             *bool              `json:"tts,omitempty"`
-	Content         *string            `json:"content,omitempty"`
-	Embeds          []Embed            `json:"embeds,omitempty"`
-	AllowedMentions *AllowedMentions   `json:"allowed_mentions,omitempty"`
-	Flags           *int               `json:"flags,omitempty"`
-	Components      []MessageComponent `json:"components,omitempty"`
-	Attachments     []Attachment       `json:"attachments,omitempty"`
+	TTS                *bool               `json:"tts,omitempty"`
+	Content            *string             `json:"content,omitempty"`
+	Embeds             []Embed             `json:"embeds,omitempty"`
+	AllowedMentions    *AllowedMentions    `json:"allowed_mentions,omitempty"`
+	Flags              *int                `json:"flags,omitempty"`
+	Components         []MessageComponent  `json:"components,omitempty"`
+	Attachments        []MessageAttachment `json:"-"`
+	DiscordAttachments []Attachment        `json:"attachments,omitempty"`
+}
+
+func (data *MessageCallbackData) GetMessageAttachments() []MessageAttachment {
+	return data.Attachments
+}
+
+func (data *MessageCallbackData) SetDiscordAttachments(attachments []Attachment) {
+	data.DiscordAttachments = attachments
+}
+
+func (data *MessageCallbackData) ToJson() ([]byte, error) {
+	return json.Marshal(*data)
 }
 
 type ResponseEditData struct {
-	Content           *string             `json:"content,omitempty"`
-	Embeds            []Embed             `json:"embeds,omitempty"`
-	AllowedMentions   *AllowedMentions    `json:"allowed_mentions"`
-	Components        []MessageComponent  `json:"components"`
-	Attachments       []MessageAttachment `json:"-"`
-	DiscordAttachment []Attachment        `json:"attachments"`
+	Content            *string             `json:"content,omitempty"`
+	Embeds             []Embed             `json:"embeds,omitempty"`
+	AllowedMentions    *AllowedMentions    `json:"allowed_mentions"`
+	Components         []MessageComponent  `json:"components"`
+	Attachments        []MessageAttachment `json:"-"`
+	DiscordAttachments []Attachment        `json:"attachments"`
 }
 
-func (data *ResponseEditData) ParseAttachments() {
-	data.DiscordAttachment = make([]Attachment, 0, len(data.Attachments))
-
-	for i, attachment := range data.Attachments {
-		data.DiscordAttachment = append(data.DiscordAttachment, attachment.ToDiscordAttachment(Snowflake(i)))
-	}
+func (data *ResponseEditData) GetMessageAttachments() []MessageAttachment {
+	return data.Attachments
 }
 
-func (data *ResponseEditData) BuildHTTPRequest(ctx context.Context, method string, url string) (*http.Request, error) {
+func (data *ResponseEditData) SetDiscordAttachments(attachments []Attachment) {
+	data.DiscordAttachments = attachments
+}
 
-	err := data.Verify()
-	if err != nil {
-		return nil, fmt.Errorf("error verifying edit data: %w", err)
-	}
-
-	body, err := json.Marshal(*data)
-	if err != nil {
-		return nil, fmt.Errorf("error marshaling data to JSON: %w", err)
-	}
-
-	var request *http.Request
-	if len(data.Attachments) > 0 {
-		data.ParseAttachments()
-
-		// Here we do form stuff
-		var requestBody bytes.Buffer
-		writer := multipart.NewWriter(&requestBody)
-
-		partHeaders := make(map[string][]string)
-		partHeaders["Content-Disposition"] = []string{`form-data; name="payload_json"`}
-		partHeaders["Content-Type"] = []string{`application/json`}
-
-		part, err := writer.CreatePart(partHeaders)
-		if err != nil {
-			fmt.Println("Error creating JSON field:", err)
-			return nil, fmt.Errorf("Failed to create JSON field")
-		}
-		_, err = part.Write(body)
-		if err != nil {
-			fmt.Println("Error writing JSON field:", err)
-			return nil, fmt.Errorf("Failed to write json field")
-		}
-
-		//Write attachments
-		for i, attachment := range data.Attachments {
-
-			partHeaders := make(map[string][]string)
-			partHeaders["Content-Disposition"] = []string{fmt.Sprintf(`form-data; name="files[%d]"; filename="%s"`, i, attachment.GetFileName())}
-			partHeaders["Content-Type"] = []string{attachment.GetContentType()}
-
-			part, err := writer.CreatePart(partHeaders)
-
-			if err != nil {
-				return nil, fmt.Errorf("error creating form file %s: %w", attachment.GetFileName(), err)
-			}
-
-			_, err = part.Write(attachment.GetBytes())
-			if err != nil {
-				return nil, fmt.Errorf("error writing file bytes for %s: %w", attachment.GetFileName(), err)
-			}
-		}
-
-		// Close the writer
-		err = writer.Close()
-		if err != nil {
-			return nil, fmt.Errorf("Failed to close writer")
-		}
-
-		if ctx != nil {
-			request, err = http.NewRequestWithContext(ctx, method, url, &requestBody)
-		} else {
-			request, err = http.NewRequest(method, url, &requestBody)
-		}
-		if err != nil {
-			return nil, fmt.Errorf("error creating HTTP request: %w", err)
-		}
-
-		request.Header.Set("Content-Type", writer.FormDataContentType())
-
-		return request, nil
-	}
-
-	// JSON parse instead
-	if ctx != nil {
-		request, err = http.NewRequestWithContext(ctx, method, url, bytes.NewReader(body))
-	} else {
-		request, err = http.NewRequest(method, url, bytes.NewReader(body))
-	}
-	if err != nil {
-		return nil, fmt.Errorf("error creating HTTP request: %w", err)
-	}
-
-	request.Header.Set("Content-Type", "application/json")
-
-	return request, nil
+func (data *ResponseEditData) ToJson() ([]byte, error) {
+	return json.Marshal(*data)
 }
 
 func (data ResponseEditData) Verify() error {
@@ -220,4 +130,115 @@ func CreateDeferEditResponse() InteractionResponse {
 	return InteractionResponse{
 		Type: interaction_callback_type.DeferredUpdateMessage,
 	}
+}
+
+type HTTPResponse struct {
+	StatusCode uint
+	Body       []byte
+	Headers    map[string]string
+}
+
+func (res HTTPResponse) WriteResponse(w http.ResponseWriter) {
+	w.WriteHeader(int(res.StatusCode))
+
+	for key, val := range res.Headers {
+		w.Header().Add(key, val)
+	}
+
+	if len(res.Body) > 0 {
+		w.Write(res.Body)
+	}
+}
+
+func (ir InteractionResponse) ToHttpResponse() HTTPResponse {
+	data, err := json.Marshal(ir)
+	if err != nil {
+		fmt.Println("Error marshalling interaction response:", err)
+		return HTTPResponse{
+			StatusCode: 500,
+		}
+	}
+
+	if messageResponse, ok := ir.Data.(MessageResponse); ok {
+		// It's a message response
+		if len(messageResponse.GetMessageAttachments()) > 0 {
+			// It has attachments
+			var buffer bytes.Buffer
+			var contentType string
+			contentType, err = WriteFormResponse(&buffer, messageResponse)
+			if err != nil {
+				fmt.Println("Error writing form response:", err)
+				return HTTPResponse{
+					StatusCode: 500,
+				}
+			}
+			return HTTPResponse{
+				StatusCode: 200,
+				Body:       buffer.Bytes(),
+				Headers: map[string]string{
+					"Content-Type": contentType,
+				},
+			}
+		}
+	}
+	return HTTPResponse{
+		StatusCode: 200,
+		Body:       data,
+		Headers: map[string]string{
+			"Content-Type": "application/json",
+		},
+	}
+}
+
+func WriteFormResponse(bodyWriter io.Writer, response MessageResponse) (contentType string, err error) {
+	ensureMessageAttachments(response)
+	body, err := response.ToJson()
+	if err != nil {
+		return "", fmt.Errorf("error marshalling response to JSON: %w", err)
+	}
+
+	writer := multipart.NewWriter(bodyWriter)
+
+	// Write the main message content first
+
+	mainMessageHeaders := make(map[string][]string)
+	mainMessageHeaders["Content-Disposition"] = []string{`form-data; name="payload_json"`}
+	mainMessageHeaders["Content-Type"] = []string{`application/json`}
+
+	mainMessagePart, err := writer.CreatePart(mainMessageHeaders)
+	if err != nil {
+		fmt.Println("Error creating JSON field:", err)
+		return "", fmt.Errorf("error creating JSON field")
+	}
+	_, err = mainMessagePart.Write(body)
+	if err != nil {
+		fmt.Println("Error writing JSON field:", err)
+		return "", fmt.Errorf("error writing JSON field")
+	}
+
+	// Write attachments
+	for i, attachment := range response.GetMessageAttachments() {
+		attachmentPartHeaders := make(map[string][]string)
+		attachmentPartHeaders["Content-Disposition"] = []string{fmt.Sprintf(`form-data; name="files[%d]"; filename="%s"`, i, attachment.GetFileName())}
+		attachmentPartHeaders["Content-Type"] = []string{attachment.GetContentType()}
+
+		attachmentPart, err := writer.CreatePart(attachmentPartHeaders)
+
+		if err != nil {
+			return "", fmt.Errorf("error creating form file %s: %w", attachment.GetFileName(), err)
+		}
+
+		_, err = attachmentPart.Write(attachment.GetBytes())
+		if err != nil {
+			return "", fmt.Errorf("error writing file bytes for %s: %w", attachment.GetFileName(), err)
+		}
+	}
+
+	// Close the writer
+	err = writer.Close()
+	if err != nil {
+		return "", fmt.Errorf("error closing multipart writer: %w", err)
+	}
+
+	return writer.FormDataContentType(), nil
 }
