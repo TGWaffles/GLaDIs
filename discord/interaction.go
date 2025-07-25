@@ -32,10 +32,10 @@ type Interaction struct {
 	GuildLocale    string                                           `json:"guild_locale"`
 	hook           *Webhook                                         // Used for responding to the interaction
 	Context        *interaction_context_type.InteractionContextType `json:"context,omitempty"`
+	Entitlements   []Entitlement                                    `json:"entitlements"`
 }
 
-type InteractionData interface {
-}
+type InteractionData any
 
 const (
 	apiUrl                       = "https://discord.com/api"
