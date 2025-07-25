@@ -153,6 +153,7 @@ func (ir InteractionResponse) ToHttpResponse() HTTPResponse {
 	if messageResponse, ok := ir.Data.(MessageResponse); ok {
 		// It's a message response
 		if len(messageResponse.GetMessageAttachments()) > 0 {
+			ensureMessageAttachments(messageResponse)
 			// It has attachments
 			var buffer bytes.Buffer
 			var contentType string
@@ -182,7 +183,6 @@ func (ir InteractionResponse) ToHttpResponse() HTTPResponse {
 }
 
 func WriteFormResponse(bodyWriter io.Writer, responseJson []byte, attachments []MessageAttachment) (contentType string, err error) {
-
 	writer := multipart.NewWriter(bodyWriter)
 
 	// Write the main message content first
@@ -238,6 +238,7 @@ func ConvertDataToBodyBytes(data InteractionCallbackData) (body []byte, contentT
 	if messageResponse, ok := data.(MessageResponse); ok {
 		if len(messageResponse.GetMessageAttachments()) > 0 {
 			// If the data is a message response with attachments, we need to write it as a form
+			ensureMessageAttachments(messageResponse)
 			var buffer bytes.Buffer
 			contentType, err = WriteFormResponse(&buffer, body, messageResponse.GetMessageAttachments())
 			if err != nil {
