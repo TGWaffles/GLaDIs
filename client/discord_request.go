@@ -15,6 +15,7 @@ type DiscordRequest struct {
 	Method         string
 	Endpoint       string
 	Body           []byte
+	ContentType    string
 
 	UnmarshalTo interface{}
 

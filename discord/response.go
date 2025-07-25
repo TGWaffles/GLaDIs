@@ -228,3 +228,24 @@ func WriteFormResponse(bodyWriter io.Writer, responseJson []byte, attachments []
 
 	return writer.FormDataContentType(), nil
 }
+
+func ConvertDataToBodyBytes(data InteractionCallbackData) (body []byte, contentType string, err error) {
+	body, err = json.Marshal(data)
+	if err != nil {
+		return nil, "", fmt.Errorf("error marshalling data to body bytes: %w", err)
+	}
+
+	if messageResponse, ok := data.(MessageResponse); ok {
+		if len(messageResponse.GetMessageAttachments()) > 0 {
+			// If the data is a message response with attachments, we need to write it as a form
+			var buffer bytes.Buffer
+			contentType, err = WriteFormResponse(&buffer, body, messageResponse.GetMessageAttachments())
+			if err != nil {
+				return nil, "", fmt.Errorf("error writing form response: %w", err)
+			}
+			return buffer.Bytes(), contentType, nil
+		}
+	}
+
+	return body, "application/json", nil
+}

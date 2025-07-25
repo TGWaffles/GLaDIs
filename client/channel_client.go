@@ -65,15 +65,16 @@ func (channelClient *ChannelClient) EditMessage(messageId discord.Snowflake, edi
 		return nil, fmt.Errorf("failed to verify response edit data validity: %w", err)
 	}
 	returnedMessage := &discord.Message{}
-	data, err := json.Marshal(editData)
+	body, contentType, err := discord.ConvertDataToBodyBytes(editData)
 	if err != nil {
-		return nil, fmt.Errorf("error marshaling response edit data to JSON: %w", err)
+		return nil, fmt.Errorf("error converting response edit data to body bytes: %w", err)
 	}
 
 	req := DiscordRequest{
 		Method:         "PATCH",
 		Endpoint:       fmt.Sprintf("/messages/%d", messageId),
-		Body:           data,
+		Body:           body,
+		ContentType:    contentType,
 		ExpectedStatus: 200,
 		UnmarshalTo:    returnedMessage,
 	}

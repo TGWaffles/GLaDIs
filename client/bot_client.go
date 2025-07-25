@@ -39,7 +39,11 @@ func (botClient *BotClient) MakeRequest(discordRequest DiscordRequest) (response
 		request.Header.Set("Authorization", "Bot "+botClient.Token)
 	}
 
-	request.Header.Set("Content-Type", "application/json")
+	contentType := discordRequest.ContentType
+	if contentType == "" {
+		contentType = "application/json"
+	}
+	request.Header.Set("Content-Type", contentType)
 	request.Header.Set("User-Agent", getUserAgent())
 	request.Header.Set("Accept", "application/json")
 
