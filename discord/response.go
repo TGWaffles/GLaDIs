@@ -129,7 +129,7 @@ type HTTPResponse struct {
 	Headers    map[string]string
 }
 
-func (res HTTPResponse) WriteResponse(w http.ResponseWriter) {
+func (res HTTPResponse) WriteResponse(w http.ResponseWriter) error {
 	w.WriteHeader(int(res.StatusCode))
 
 	for key, val := range res.Headers {
@@ -137,8 +137,12 @@ func (res HTTPResponse) WriteResponse(w http.ResponseWriter) {
 	}
 
 	if len(res.Body) > 0 {
-		w.Write(res.Body)
+		_, err := w.Write(res.Body)
+		if err != nil {
+			return fmt.Errorf("error writing response body: %w", err)
+		}
 	}
+	return nil
 }
 
 func (ir InteractionResponse) ToHttpResponse() HTTPResponse {
