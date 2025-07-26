@@ -130,11 +130,11 @@ type HTTPResponse struct {
 }
 
 func (res HTTPResponse) WriteResponse(w http.ResponseWriter) error {
-	w.WriteHeader(int(res.StatusCode))
-
 	for key, val := range res.Headers {
 		w.Header().Add(key, val)
 	}
+
+	w.WriteHeader(int(res.StatusCode))
 
 	if len(res.Body) > 0 {
 		_, err := w.Write(res.Body)
