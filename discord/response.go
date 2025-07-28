@@ -13,26 +13,7 @@ import (
 
 type InteractionResponse struct {
 	Type interaction_callback_type.InteractionCallbackType `json:"type"`
-	Data InteractionCallbackData                           `json:"data,omitempty"`
-}
-
-type InteractionCallbackData interface {
-}
-
-type MessageResponse interface {
-	GetMessageAttachments() []MessageAttachment
-	SetDiscordAttachments([]Attachment)
-}
-
-func ensureMessageAttachments(response MessageResponse) {
-	existingAttachments := response.GetMessageAttachments()
-	discordAttachments := make([]Attachment, 0, len(existingAttachments))
-
-	for i, attachment := range existingAttachments {
-		discordAttachments = append(discordAttachments, attachment.ToDiscordAttachment(Snowflake(i)))
-	}
-
-	response.SetDiscordAttachments(discordAttachments)
+	Data *MessageCallbackData                               `json:"data,omitempty"`
 }
 
 type MessageCallbackData struct {
@@ -44,6 +25,8 @@ type MessageCallbackData struct {
 	Components         []MessageComponent  `json:"components,omitempty"`
 	Attachments        []MessageAttachment `json:"-"`
 	DiscordAttachments []Attachment        `json:"attachments,omitempty"`
+	CustomId           string              `json:"custom_id,omitempty"`
+	Title              string              `json:"title,omitempty"`
 }
 
 func (data *MessageCallbackData) GetMessageAttachments() []MessageAttachment {
@@ -154,28 +137,26 @@ func (ir InteractionResponse) ToHttpResponse() HTTPResponse {
 		}
 	}
 
-	if messageResponse, ok := ir.Data.(MessageResponse); ok {
-		// It's a message response
-		if len(messageResponse.GetMessageAttachments()) > 0 {
-			ensureMessageAttachments(messageResponse)
-			// It has attachments
-			var buffer bytes.Buffer
-			var contentType string
-			contentType, err = WriteFormResponse(&buffer, data, messageResponse.GetMessageAttachments())
-			if err != nil {
-				fmt.Println("Error writing form response:", err)
-				return HTTPResponse{
-					StatusCode: 500,
-				}
-			}
+	// It's a message response
+	if len(ir.Data.Attachments) > 0 {
+		// It has attachments
+		var buffer bytes.Buffer
+		var contentType string
+		contentType, err = WriteFormResponse(&buffer, data, ir.Data.Attachments)
+		if err != nil {
+			fmt.Println("Error writing form response:", err)
 			return HTTPResponse{
-				StatusCode: 200,
-				Body:       buffer.Bytes(),
-				Headers: map[string]string{
-					"Content-Type": contentType,
-				},
+				StatusCode: 500,
 			}
 		}
+		return HTTPResponse{
+			StatusCode: 200,
+			Body:       buffer.Bytes(),
+			Headers: map[string]string{
+				"Content-Type": contentType,
+			},
+		}
+
 	}
 	return HTTPResponse{
 		StatusCode: 200,
@@ -233,23 +214,20 @@ func WriteFormResponse(bodyWriter io.Writer, responseJson []byte, attachments []
 	return writer.FormDataContentType(), nil
 }
 
-func ConvertDataToBodyBytes(data InteractionCallbackData) (body []byte, contentType string, err error) {
+func ConvertDataToBodyBytes(data ResponseEditData) (body []byte, contentType string, err error) {
 	body, err = json.Marshal(data)
 	if err != nil {
 		return nil, "", fmt.Errorf("error marshalling data to body bytes: %w", err)
 	}
 
-	if messageResponse, ok := data.(MessageResponse); ok {
-		if len(messageResponse.GetMessageAttachments()) > 0 {
-			// If the data is a message response with attachments, we need to write it as a form
-			ensureMessageAttachments(messageResponse)
-			var buffer bytes.Buffer
-			contentType, err = WriteFormResponse(&buffer, body, messageResponse.GetMessageAttachments())
-			if err != nil {
-				return nil, "", fmt.Errorf("error writing form response: %w", err)
-			}
-			return buffer.Bytes(), contentType, nil
+	if len(data.Attachments) > 0 {
+		// If the data is a message response with attachments, we need to write it as a form
+		var buffer bytes.Buffer
+		contentType, err = WriteFormResponse(&buffer, body, data.Attachments)
+		if err != nil {
+			return nil, "", fmt.Errorf("error writing form response: %w", err)
 		}
+		return buffer.Bytes(), contentType, nil
 	}
 
 	return body, "application/json", nil
