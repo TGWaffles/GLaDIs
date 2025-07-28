@@ -65,7 +65,7 @@ func (channelClient *ChannelClient) EditMessage(messageId discord.Snowflake, edi
 		return nil, fmt.Errorf("failed to verify response edit data validity: %w", err)
 	}
 	returnedMessage := &discord.Message{}
-	body, contentType, err := discord.ConvertDataToBodyBytes(editData)
+	body, contentType, err := discord.ConvertDataToBodyBytes(&editData)
 	if err != nil {
 		return nil, fmt.Errorf("error converting response edit data to body bytes: %w", err)
 	}

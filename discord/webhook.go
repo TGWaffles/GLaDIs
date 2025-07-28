@@ -181,7 +181,7 @@ func (hook *Webhook) EditMessage(messageId string, data ResponseEditData) error 
 }
 
 func (hook *Webhook) EditMessageWithContext(ctx context.Context, messageId string, data ResponseEditData) error {
-	body, contentType, err := ConvertDataToBodyBytes(data)
+	body, contentType, err := ConvertDataToBodyBytes(&data)
 	if err != nil {
 		return fmt.Errorf("error converting data to body bytes: %w", err)
 	}

@@ -71,7 +71,7 @@ func (data *ResponseEditData) SetDiscordAttachments(attachments []Attachment) {
 	data.DiscordAttachments = attachments
 }
 
-func (data ResponseEditData) Verify() error {
+func (data *ResponseEditData) Verify() error {
 	if data.Content != nil && len(*data.Content) > 2000 {
 		return fmt.Errorf("content cannot be longer than 2000 characters (you have %d)", len(*data.Content))
 	}
@@ -146,18 +146,19 @@ func (res HTTPResponse) WriteResponse(w http.ResponseWriter) error {
 }
 
 func (ir InteractionResponse) ToHttpResponse() HTTPResponse {
-	data, err := json.Marshal(ir)
-	if err != nil {
-		fmt.Println("Error marshalling interaction response:", err)
-		return HTTPResponse{
-			StatusCode: 500,
-		}
-	}
 
 	if messageResponse, ok := ir.Data.(MessageResponse); ok {
 		// It's a message response
 		if len(messageResponse.GetMessageAttachments()) > 0 {
 			ensureMessageAttachments(messageResponse)
+			data, err := json.Marshal(ir)
+			if err != nil {
+				fmt.Println("Error marshalling interaction response:", err)
+				return HTTPResponse{
+					StatusCode: 500,
+				}
+			}
+
 			// It has attachments
 			var buffer bytes.Buffer
 			var contentType string
@@ -175,6 +176,14 @@ func (ir InteractionResponse) ToHttpResponse() HTTPResponse {
 					"Content-Type": contentType,
 				},
 			}
+		}
+	}
+
+	data, err := json.Marshal(ir)
+	if err != nil {
+		fmt.Println("Error marshalling interaction response:", err)
+		return HTTPResponse{
+			StatusCode: 500,
 		}
 	}
 	return HTTPResponse{
@@ -234,15 +243,14 @@ func WriteFormResponse(bodyWriter io.Writer, responseJson []byte, attachments []
 }
 
 func ConvertDataToBodyBytes(data InteractionCallbackData) (body []byte, contentType string, err error) {
-	body, err = json.Marshal(data)
-	if err != nil {
-		return nil, "", fmt.Errorf("error marshalling data to body bytes: %w", err)
-	}
-
 	if messageResponse, ok := data.(MessageResponse); ok {
 		if len(messageResponse.GetMessageAttachments()) > 0 {
 			// If the data is a message response with attachments, we need to write it as a form
 			ensureMessageAttachments(messageResponse)
+			body, err = json.Marshal(data)
+			if err != nil {
+				return nil, "", fmt.Errorf("error marshalling data to body bytes: %w", err)
+			}
 			var buffer bytes.Buffer
 			contentType, err = WriteFormResponse(&buffer, body, messageResponse.GetMessageAttachments())
 			if err != nil {
@@ -250,6 +258,11 @@ func ConvertDataToBodyBytes(data InteractionCallbackData) (body []byte, contentT
 			}
 			return buffer.Bytes(), contentType, nil
 		}
+	}
+
+	body, err = json.Marshal(data)
+	if err != nil {
+		return nil, "", fmt.Errorf("error marshalling data to body bytes: %w", err)
 	}
 
 	return body, "application/json", nil
