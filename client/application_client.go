@@ -76,3 +76,19 @@ func (appClient *ApplicationClient) RegisterCommand(cmds CreateApplicationComman
 
 	return nil
 }
+
+func (appClient *ApplicationClient) GetActivityInstance(instanceId string) (*discord.ActivityInstance, error) {
+	activityInstance := &discord.ActivityInstance{}
+	_, err := appClient.MakeRequest(DiscordRequest{
+		Method:         "GET",
+		Endpoint:       "/activity-instances/" + instanceId,
+		ExpectedStatus: 200,
+		UnmarshalTo:    activityInstance,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return activityInstance, nil
+}
