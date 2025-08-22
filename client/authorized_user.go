@@ -100,3 +100,20 @@ func (authedUser *AuthorizedUser) FetchGuilds() ([]discord.Guild, error) {
 
 	return guilds, nil
 }
+
+func (authedUser *AuthorizedUser) FetchGuildMember(guildId discord.Snowflake) (*discord.Member, error) {
+	member := &discord.Member{}
+
+	_, err := authedUser.MakeRequest(DiscordRequest{
+		Method:         "GET",
+		Endpoint:       "/users/@me/guilds/" + guildId.String() + "/member",
+		ExpectedStatus: 200,
+		UnmarshalTo:    &member,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return member, nil
+}
